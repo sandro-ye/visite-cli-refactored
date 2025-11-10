@@ -72,4 +72,20 @@ public class FileAvailabilityRepository implements AvailabilityRepository {
     public Set<LocalDate> getDates(String nickname, YearMonth ym) throws IOException {
         return find(nickname, ym).map(VolunteerAvailability::dates).orElseGet(Set::of);
     }
+
+    public static void clearAll(Path basePath) {
+    File dataDir = basePath.toFile();
+    if (dataDir.exists() && dataDir.isDirectory()) {
+        int deleted = 0;
+        for (File f : dataDir.listFiles()) {
+            if (f.isFile() && f.getName().endsWith("_availabilities.ser")) {
+                if (f.delete()) deleted++;
+            }
+        }
+        System.out.println("[INFO] Eliminati " + deleted + " file di disponibilità volontari dopo la generazione del piano.");
+    } else {
+        System.out.println("[INFO] Nessuna disponibilità trovata da eliminare.");
+    }
+    }
+
 }

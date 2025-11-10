@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 import it.unibs.visite.model.StatoVisita;
 import it.unibs.visite.model.Visita;
-import it.unibs.visite.service.ConfigService;
+//import it.unibs.visite.service.ConfigService;
 
 public class RegimeCLI {
     private final Scanner in;

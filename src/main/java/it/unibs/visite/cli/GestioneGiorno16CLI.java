@@ -209,7 +209,7 @@ public class GestioneGiorno16CLI {
         System.out.print("Nickname del volontario da rimuovere: ");
         String nick = in.nextLine().trim();
         config.rimuoviVolontario(nick);
-        System.out.println("✔ Volontario rimosso.");
+        System.out.println("Volontario rimosso.");
     }
 
     private void associaVolontarioATipoVisita() {

@@ -2,6 +2,7 @@ package it.unibs.visite.cli;
 
 import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.RegimeService;
+import it.unibs.visite.model.AppPhase;
 import it.unibs.visite.model.Luogo;
 import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.model.Visita;
@@ -43,6 +44,11 @@ public class GiornoSediciCLI {
         // 1 CHIUSURA RACCOLTA DISPONIBILITÀ + GENERAZIONE PIANO
         System.out.println("[1] Chiusura raccolta disponibilità per " + meseProssimo + "...");
         try {
+            
+            if (configService.getSnapshot().getFaseCorrente() != AppPhase.RACCOLTA_DISPONIBILITA) {
+            System.out.println("[WARN] Fase non coerente con la generazione del piano. Ripristino RACCOLTA_DISPONIBILITA...");
+            configService.setPhase(AppPhase.RACCOLTA_DISPONIBILITA);
+}
             List<Visita> piano = configService.chiudiDisponibilitaEGeneraPiano(meseProssimo);
             System.out.println("Piano delle visite per " + meseProssimo + " generato con successo.\n");
             stampaPiano(piano, meseProssimo);

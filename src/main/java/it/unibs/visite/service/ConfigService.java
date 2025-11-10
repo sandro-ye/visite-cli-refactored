@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -162,6 +162,10 @@ public class ConfigService {
         ds.setFaseCorrente(AppPhase.GESTIONE_AGGIUNTE_RIMOZIONI);
         
         fp.saveData(ds);
+
+        // Elimina le disponibilità dei volontari
+        FileAvailabilityRepository.clearAll(Paths.get("data"));
+
         return result;
     }
 
@@ -191,6 +195,18 @@ public class ConfigService {
     public List<TipoVisita> getAllTipiVisita() {
         // DataStore espone getTipiVisita() che ritorna Collection<TipoVisita>
         return new ArrayList<>(ds.getTipiVisita());
+    }
+
+    public void setPhase(AppPhase nuovaFase) {
+        ds.setFaseCorrente(nuovaFase);
+
+        // Salva lo stato aggiornato nel DataStore
+        try {
+            fp.saveData(ds);
+            System.out.println("[INFO] Fase applicativa impostata a: " + nuovaFase);
+        } catch (Exception e) {
+            System.err.println("[ERRORE] Impossibile aggiornare la fase applicativa: " + e.getMessage());
+        }
     }
 
 
@@ -230,29 +246,23 @@ public class ConfigService {
         return ds.getPreclusioniFor(ym);
     }
 
- public boolean existsVisitTypeProgrammableOn(String nickname, LocalDate date) {
-    // 1. volontario deve esistere
-    Volontario vol = ds.getVolontario(nickname);
-    if (vol == null) return false;
-
-    // 2. prendo tutti i tipiVisita
-    for (TipoVisita tv : ds.getTipiVisita()) {
-
-        // 3. se questo tipoVisita include il volontario...
-        if (tv.getVolontariNicknames().contains(nickname)) {
-
-            // 4. QUI sarebbe il punto in cui controlleremmo se il tipo è effettivamente
-            //    programmabile proprio in quella data (giorno settimanale, periodo valido, ecc.)
-            //    Ma al momento TipoVisita NON contiene queste informazioni nel tuo modello.
-            //    Quindi, per ora, diciamo che "esiste un tipo che può teoricamente essere programmato".
-            return true;
+    // Programmabilità (semplificata): giorno settimana + periodo
+ public boolean existsVisitTypeProgrammableOn(String nickname, LocalDate date){
+        for(TipoVisita tv : ds.getTipiVisita()){
+            if(tv.getVolontariNicknames().contains(nickname) &&
+               tv.getGiorniSettimana().contains(date.getDayOfWeek()) &&
+               !date.isBefore(tv.getDataInizioProgrammazione()) &&
+               !date.isAfter(tv.getDataFineProgrammazione())) return true;
         }
+        return false;
     }
 
-    return false;
-}
 
-
+    //  pubblica piano nel DataStore
+    public void pubblicaPiano(List<Visita> piano){
+        for(Visita v: piano) ds.addVisita(v);
+        save();
+    }
 
     public Set<String> visitTypeDescriptionsForVolunteer(String nickname) {
     Volontario vol = ds.getVolontario(nickname);

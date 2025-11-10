@@ -2,67 +2,69 @@ package it.unibs.visite.model;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
-/**
- * Istanza concreta di un TipoVisita collocata in una specifica data,
- * con assegnazione di un volontario e stato della visita.
- */
 public class Visita implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private final String id; // es. "T1_2025-04-05"
+    private final String id;
     private final String tipoVisitaId;
     private final LocalDate data;
     private String volontarioNickname;
-    private StatoVisita stato;
+    private StatoVisita stato = StatoVisita.PROPOSTA;
     private final int numeroMinimoPartecipanti;
     private final int numeroMassimoPartecipanti;
-    private final Set<String> codiciPrenotazione = new HashSet<>();
+    private final java.util.List<Iscrizione> iscrizioni = new java.util.ArrayList<>();
 
-    public Visita(String id, String tipoVisitaId, LocalDate data,
-                  int numeroMinimoPartecipanti, int numeroMassimoPartecipanti) {
-        Objects.requireNonNull(id);
-        Objects.requireNonNull(tipoVisitaId);
-        Objects.requireNonNull(data);
-        this.id = id;
-        this.tipoVisitaId = tipoVisitaId;
-        this.data = data;
-        this.numeroMinimoPartecipanti = numeroMinimoPartecipanti;
-        this.numeroMassimoPartecipanti = numeroMassimoPartecipanti;
-        this.stato = StatoVisita.PROPOSTA;
+    public Visita(String id, String tipoVisitaId, LocalDate data, int min, int max){
+        this.id = Objects.requireNonNull(id);
+        this.tipoVisitaId = Objects.requireNonNull(tipoVisitaId);
+        this.data = Objects.requireNonNull(data);
+        this.numeroMinimoPartecipanti = min;
+        this.numeroMassimoPartecipanti = max;
     }
 
-    public String getId() { return id; }
-    public String getTipoVisitaId() { return tipoVisitaId; }
-    public LocalDate getData() { return data; }
-    public String getVolontarioNickname() { return volontarioNickname; }
-    public void setVolontarioNickname(String volontarioNickname) { this.volontarioNickname = volontarioNickname; }
-    public StatoVisita getStato() { return stato; }
-    public void setStato(StatoVisita stato) { this.stato = stato; }
+    public String getId(){ return id; }
+    public String getTipoVisitaId(){ return tipoVisitaId; }
+    public LocalDate getData(){ return data; }
+    public String getVolontarioNickname(){ return volontarioNickname; }
+    public void setVolontarioNickname(String v){ this.volontarioNickname = v; }
+    public StatoVisita getStato(){ return stato; }
+    public void setStato(StatoVisita s){ this.stato = s; }
+    public int getNumeroMinimoPartecipanti(){ return numeroMinimoPartecipanti; }
+    public int getNumeroMassimoPartecipanti(){ return numeroMassimoPartecipanti; }
 
-    public int getNumeroIscritti() { return codiciPrenotazione.size(); }
-    public int getNumeroMinimoPartecipanti() { return numeroMinimoPartecipanti; }
-    public int getNumeroMassimoPartecipanti() { return numeroMassimoPartecipanti; }
-
-    public boolean isCompleta() {
-        return codiciPrenotazione.size() >= numeroMassimoPartecipanti;
+    //  conteggio su persone e non su #prenotazioni
+    public int getTotalePersone(){
+        return iscrizioni.stream().mapToInt(Iscrizione::getNumeroPersone).sum();
     }
 
-    public boolean addPrenotazione(String codice) {
-        if (isCompleta()) return false;
-        return codiciPrenotazione.add(codice);
+    public boolean isCompletaByPersone(){
+        return getTotalePersone() >= numeroMassimoPartecipanti;
     }
 
-    public boolean removePrenotazione(String codice) {
-        return codiciPrenotazione.remove(codice);
+    //  iscrizione con transizione di stato
+    public Iscrizione aggiungiIscrizione(Fruitore fruitore, int numPersone){
+        if(stato != StatoVisita.PROPOSTA && stato != StatoVisita.COMPLETA)
+            throw new IllegalStateException("Iscrizioni non permesse in stato: "+stato);
+        if(getTotalePersone() + numPersone > numeroMassimoPartecipanti)
+            throw new IllegalStateException("superamento numero partecipanti");
+        Iscrizione is = new Iscrizione(fruitore, id, numPersone);
+        iscrizioni.add(is);
+        if(isCompletaByPersone()) this.stato = StatoVisita.COMPLETA;
+        return is;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Visita{id=%s, tipo=%s, data=%s, guida=%s, stato=%s, iscritti=%d}",
-                id, tipoVisitaId, data, volontarioNickname, stato, codiciPrenotazione.size());
+    //  disdetta con eventuale ritorno a PROPOSTA
+    public void removeIscrizione(String codice){
+        boolean removed = iscrizioni.removeIf(i -> i.getCodice().equals(codice));
+        if(removed && stato==StatoVisita.COMPLETA && getTotalePersone() < numeroMassimoPartecipanti){
+            this.stato = StatoVisita.PROPOSTA;
+        }
+    }
+
+    public java.util.List<Iscrizione> getIscrizioni(){ return java.util.Collections.unmodifiableList(iscrizioni); }
+
+    @Override public String toString(){
+        return String.format("Visita{id=%s, tipo=%s, data=%s, guida=%s, stato=%s, persone=%d}",
+            id, tipoVisitaId, data, volontarioNickname, stato, getTotalePersone());
     }
 }

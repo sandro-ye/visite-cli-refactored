@@ -1,6 +1,8 @@
 package it.unibs.visite.model;
 import java.io.Serializable;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import it.unibs.visite.core.Preconditions;
 
@@ -9,14 +11,18 @@ public class TipoVisita implements Serializable {
     private final String luogoId;
     private String titolo;
     private String descrizione;
-    // vincolo: almeno 1 volontario
-    private final Set<String> volontariNicknames = new HashSet<>();
+    private String puntoIncontro;
+    private LocalDate dataInizioProgrammazione;
+    private LocalDate dataFineProgrammazione; 
     private final Set<DayOfWeek>  giorniSettimana = new HashSet<>();
+    private LocalTime oraInizio;
+    private int durataMinuti;
+    private boolean bigliettoRichiesto;
     private int numeroMinimoPartecipanti;
     private int numeroMassimoPartecipanti;
+    private final Set<String> volontariNicknames = new HashSet<>();
 
-
-
+    // Costruttore con inizializzazione completa dei parametri
     public TipoVisita(String luogoId, String titolo, String descrizione) {
         this.id = UUID.randomUUID().toString();
         this.luogoId = Objects.requireNonNull(luogoId);
@@ -24,22 +30,43 @@ public class TipoVisita implements Serializable {
         this.descrizione = descrizione == null ? "" : descrizione;
         inizializzaParametri();
     }
+
+    // Costruttore leggero per test (salta inizializzazione parametri non essenziali)
+    public TipoVisita(String luogoId, String titolo, String descrizione, boolean skipInput) {
+        this.id = UUID.randomUUID().toString();
+        this.luogoId = Objects.requireNonNull(luogoId);
+        this.titolo = Objects.requireNonNull(titolo);
+        this.descrizione = descrizione == null ? "" : descrizione;
+        if (!skipInput) inizializzaParametri();
+    }
+
+    // Getters e Setters
     public String getId() { return id; }
     public String getLuogoId() { return luogoId; }
     public String getTitolo() { return titolo; }
     public String getDescrizione() { return descrizione; }
+    public String getPuntoIncontro() { return puntoIncontro; }
+    public LocalDate getDataInizioProgrammazione() { return dataInizioProgrammazione; }
+    public LocalDate getDataFineProgrammazione() { return dataFineProgrammazione; }
+    public Set<DayOfWeek> getGiorniSettimana() { return giorniSettimana; }
+    public LocalTime getOraInizio() { return oraInizio; }
+    public int getDurataMinuti() { return durataMinuti; }
+    public boolean getBigliettoRichiesto() { return bigliettoRichiesto; }
+    public int getNumeroMinimoPartecipanti() { return this.numeroMinimoPartecipanti; }
+    public int getNumeroMassimoPartecipanti() { return this.numeroMassimoPartecipanti; }
     public Set<String> getVolontariNicknames() { return Collections.unmodifiableSet(volontariNicknames); }
 
+    public void setPuntoIncontro(String puntoIncontro) { this.puntoIncontro = puntoIncontro;}
+    public void setDataInizioProgrammazione(LocalDate dataInizioProgrammazione) { this.dataInizioProgrammazione = dataInizioProgrammazione;}
+    public void setDataFineProgrammazione(LocalDate dataFineProgrammazione) { this.dataFineProgrammazione = dataFineProgrammazione; }
     public void setGiorniSettimana (Set<DayOfWeek> giorni) {
         if (giorni != null) this.giorniSettimana.addAll(giorni);
         else giorniSettimana.add(DayOfWeek.MONDAY);
     }
-    public Set<DayOfWeek> getGiorniSettimana() { return giorniSettimana; }
-
-    public int getNumeroMinimoPartecipanti() { return this.numeroMinimoPartecipanti; }
+    public void setOraInizio(LocalTime oraInizio) { this.oraInizio = oraInizio; }
+    public void setDurataMinuti(int durataMinuti) {this.durataMinuti = durataMinuti; }
+    public void setBigliettoRichiesto(boolean bigliettoRichiesto) { this.bigliettoRichiesto = bigliettoRichiesto;}
     public void setNumeroMinimoPartecipanti(int num) { this.numeroMinimoPartecipanti = num; }
-    
-    public int getNumeroMassimoPartecipanti() { return this.numeroMassimoPartecipanti; }
     public void setNumeroMassimoPartecipanti(int num) { this.numeroMassimoPartecipanti = num; }
 
 
@@ -62,13 +89,35 @@ public class TipoVisita implements Serializable {
         Preconditions.notBlank(luogoId, "luogoId obbligatorio");
         Preconditions.notBlank(titolo, "titolo obbligatorio");
         Preconditions.notBlank(descrizione, "descrizione obbligatoria");
+        Preconditions.notNull(dataInizioProgrammazione, "dataInizio obbligatoria");
+        Preconditions.notNull(dataFineProgrammazione, "dataFine obbligatoria");
+        Preconditions.check(!dataFineProgrammazione.isBefore(dataInizioProgrammazione), "dataFine deve essere dopo dataInizio");
         Preconditions.check(!volontariNicknames.isEmpty(), "invariante violato: ogni TipoVisita deve avere almeno un volontario");
+        Preconditions.check(numeroMassimoPartecipanti >= numeroMinimoPartecipanti, "Numero massimo di partecipanti deve essere maggiore del numero minimo");
     }
 
+    // Metodo per completare il costruttore
     private void inizializzaParametri() {
         @SuppressWarnings("resource")
         Scanner in = new Scanner(System.in);
         System.out.println("\n== Impostazione parametri per il tipo di visita: " + titolo + " ==");
+
+        // --- Punto d'incontro ---
+        System.out.print("Punto d'incontro: ");
+        setPuntoIncontro(in.nextLine().trim());
+
+        while (true) {
+            try {
+                System.out.print("Data inizio (YYYY-MM-DD): ");
+                setDataInizioProgrammazione(LocalDate.parse(in.nextLine().trim()));
+                System.out.print("Data fine (YYYY-MM-DD): ");
+                setDataFineProgrammazione(LocalDate.parse(in.nextLine().trim()));
+                Preconditions.check(!dataFineProgrammazione.isBefore(dataInizioProgrammazione), "Data fine prima della data inizio");
+                break;
+            } catch (Exception e) {
+                System.out.println("Formato non valido, riprova");
+            }
+        }
 
         // --- Giorni della settimana ---
         System.out.println("Inserisci i giorni della settimana in cui la visita è disponibile.");
@@ -77,7 +126,7 @@ public class TipoVisita implements Serializable {
         System.out.print("Giorni: ");
         String inputGiorni = in.nextLine().trim();
 
-        // 🔹 Mappa ITA → ENGLISH per compatibilità con DayOfWeek
+        // Mappa ITA → ENGLISH per compatibilità con DayOfWeek
         Map<String, DayOfWeek> traduzione = Map.ofEntries(
             Map.entry("LUNEDI", DayOfWeek.MONDAY),
             Map.entry("MARTEDI", DayOfWeek.TUESDAY),
@@ -105,6 +154,33 @@ public class TipoVisita implements Serializable {
             giorni.add(DayOfWeek.MONDAY);
         }
         setGiorniSettimana(giorni);
+
+        // --- Ora di inizio ---
+        while(true) {
+            try {
+                System.out.print("Ora di inizio (HH:MM): ");
+                setOraInizio(LocalTime.parse(in.nextLine().trim()));
+                break;
+            } catch (Exception e) {
+                System.out.println("Formato non valido, riprova.");
+            }
+        }
+
+        // --- Durata ---
+        while (true) {
+            try {
+                System.out.print("Durata (minuti): ");
+                setDurataMinuti(Integer.parseInt(in.nextLine().trim()));
+                if (durataMinuti > 0) break;
+            } catch (Exception e) {
+                System.out.println("Inserisci un numero positivo.");
+            }
+        }
+
+        //--- Biglietto ---
+        System.out.print("È richiesto un biglietto d'ingresso? (s/n): ");
+        String risposta = in.nextLine().trim();
+        setBigliettoRichiesto(risposta.equalsIgnoreCase("s"));
 
         // --- Numero minimo partecipanti ---
         int min;

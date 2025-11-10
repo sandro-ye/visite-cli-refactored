@@ -16,14 +16,10 @@ public class ParametriSistema implements Serializable {
         if (this.ambitoTerritoriale != null) throw new IllegalStateException("Ambito già impostato");
         this.ambitoTerritoriale = ambito;
     }
-    public void setMaxPersonePerIscrizione(int max) {
-        /*
-        if (max <= 0) throw new IllegalArgumentException("Max deve essere > 0");
-        this.maxPersonePerIscrizione = max;
-        */
+   public void setMaxPersonePerIscrizione(int max){
         Preconditions.check(max > 0, "il numero massimo di persone deve essere > 0");
         this.maxPersonePerIscrizione = max;
-        assert this.maxPersonePerIscrizione > 0 : "Invariante violato: maxPersonePerIscrizione deve essere > 0";
+        assert this.maxPersonePerIscrizione > 0;
     }
     public void markInitialized() { this.initialized = true; }
 }

@@ -1,10 +1,10 @@
 package it.unibs.visite.service;
 
-import it.unibs.visite.model.VolunteerAvailability;
+//import it.unibs.visite.model.VolunteerAvailability;
 import it.unibs.visite.persistence.AvailabilityRepository;
 import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ports.ConfigReadPort;
-import it.unibs.visite.core.DomainException;
+//import it.unibs.visite.core.DomainException;
 import it.unibs.visite.core.Preconditions;
 
 import java.io.IOException;

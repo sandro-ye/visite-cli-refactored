@@ -33,8 +33,16 @@ public class DataStore implements Serializable {
     return disponibilitaPerMese;
     }
 
+    // -- fruitori -- versione 4
+    private final Map<String, Fruitore> fruitori = new HashMap<>();
 
-     // ---- preclusioni ----
+
+    
+    
+    
+    
+    
+    // ---- preclusioni ----
     public void setPreclusioni(YearMonth ym, Set<LocalDate> dates) {
         preclusioniPerMese.put(ym, new HashSet<>(dates));
     }
@@ -54,7 +62,17 @@ public class DataStore implements Serializable {
 
     public Optional<VolunteerAvailability> getDisponibilita(YearMonth ym, String nickname) {
         Map<String, VolunteerAvailability> m = disponibilitaPerMese.get(ym);
-        return m == null ? Optional.empty() : Optional.ofNullable(m.get(nickname));
+        if (m == null) {
+            return Optional.empty();
+        }
+
+        VolunteerAvailability av = m.get(nickname);
+        if (av == null || av.getDates() == null || av.getDates().isEmpty()) {
+            return Optional.empty(); // Nessuna disponibilità reale registrata
+        }
+
+        return Optional.of(av);
+
     }
 
     public void clearDisponibilita(YearMonth ym) { disponibilitaPerMese.remove(ym); }
@@ -201,6 +219,29 @@ public class DataStore implements Serializable {
         return result;
     }
 
+    // ====== aggiunte versione 4 ========
+    public void addFruitore(Fruitore f) {
+        fruitori.put(f.getUsername(), f);
+    }
+
+    public Fruitore getFruitore(String username) {
+        return fruitori.get(username);
+    }
+
+    public boolean existsFruitore(String username) {
+        return fruitori.containsKey(username);
+    }
+
+    public Collection<Fruitore> getAllFruitori() {
+        return List.copyOf(fruitori.values());
+    }
+
+    public Visita getVisitaByCodiceIscrizione(String codice) {
+        return visite.values().stream()
+            .filter(v -> v.getIscrizioni().stream().anyMatch(i -> i.getCodice().equals(codice)))
+            .findFirst()
+            .orElse(null);
+    }
 }
 
 

@@ -3,16 +3,11 @@ package it.unibs.visite.cli;
 import it.unibs.visite.persistence.FilePersistence;
 import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ConfigService;
-import it.unibs.visite.service.InitWizardService;
 import it.unibs.visite.service.RegimeService;
-import it.unibs.visite.cli.VolunteerCLI;
-import it.unibs.visite.model.AppPhase;
+import it.unibs.visite.service.RegistrationService;
 
 import java.nio.file.Paths;
-import java.time.YearMonth;
 import java.util.Scanner;
-
-//Possiamo rendere questa classe il main del programma
 
 public class MainCLI {
 
@@ -22,7 +17,7 @@ public class MainCLI {
     private final ConfigService config;
     private final InitWizardCLI wizardCLI;
     private final RegimeCLI regimeCLI;
-    private final VolunteerCLI volunteerCLI;
+    private final RegistrationService reg;
 
     public MainCLI() {
         // cartella dati ~/.visite-cli
@@ -30,55 +25,106 @@ public class MainCLI {
         this.auth = new AuthService(persistence);
         this.config = new ConfigService(persistence, auth);
 
-        // Controllo extra della fase nel caso in cui l'applicazione sia terminata in modo improvviso senza cambiare fase
-        // Dopo this.config = new ConfigService(persistence, auth);
-        YearMonth meseCorrente = YearMonth.now();
-        if (!config.isGiornoSedici() && config.getSnapshot().getFaseCorrente() != AppPhase.RACCOLTA_DISPONIBILITA) {
-            System.out.println("(Riattivo la raccolta disponibilità per il mese corrente)");
-            config.riapriRaccoltaDisponibilita(meseCorrente.plusMonths(1));
-        }
+        // [MODIFICA] RegistrationService usa il DataStore CONDIVISO dell'applicazione
+        this.reg  = new RegistrationService(config.getSnapshot(), persistence, auth);
 
-        //this.wizardCLI = new InitWizardCLI(in, config, auth);
         this.wizardCLI = new InitWizardCLI(in, config);
         this.regimeCLI = new RegimeCLI(in, new RegimeService(config));
-        this.volunteerCLI = new VolunteerCLI(auth, config, null);
+        // Niente VolunteerCLI qui; verrà creato più avanti con l'username effettivo.
     }
 
-   public void run() {
-    System.out.println("=== VISITE CLI - VERSIONE 2 ===");
-    System.out.println("(Configuratore o Volontario)\n");
+    public void run() {
+        System.out.println("=== VISITE CLI  ===");
+        System.out.println("(Configuratore o Volontario)\n");
 
-    // LOGIN
-    String username = doLogin();
+        String username = null;
 
-    // Se primo accesso → cambio password obbligatorio
-    if (auth.mustChangePassword(username)) {
-        doChangePassword(username);
+        System.out.println("=== ACCESSO VISITE GUIDATE ===");
+        System.out.println("1) Registrati (fruitore)");
+        System.out.println("2) Accedi");
+        System.out.println("0) Esci");
+        System.out.print("> ");
+
+        String choice = in.nextLine().trim();
+        switch (choice) {
+            case "1" -> {
+                // [MODIFICA] Flusso registrazione con RegistrationService
+                while (true) {
+                    System.out.println("--- registrazione nuovo fruitore ---");
+                    System.out.print("Username: ");
+                    String desired = in.nextLine().trim();
+
+                    if (!reg.isUsernameAvailable(desired)) {
+                        System.out.println("Errore: username già in uso (presente tra credenziali o fruitori). Riprova.\n");
+                        continue;
+                    }
+
+                    System.out.print("Password: ");
+                    char[] pass1 = in.nextLine().toCharArray();
+                    System.out.print("Conferma password: ");
+                    char[] pass2 = in.nextLine().toCharArray();
+
+                    if (!new String(pass1).equals(new String(pass2))) {
+                        System.out.println("Le password non coincidono. Riprova.\n");
+                        continue;
+                    }
+
+                    try {
+                        reg.registerFruitore(desired, pass1);
+                        System.out.println("Registrazione completata. Benvenuto, " + desired + "!");
+                        username = desired; // prosegui direttamente come fruitore
+                        break;
+                    } catch (IllegalArgumentException ex) {
+                        System.out.println("Registrazione fallita: " + ex.getMessage());
+                        // ripeti ciclo
+                    }
+                }
+            }
+            case "2" -> username = doLogin();
+            case "0" -> {
+                System.out.println("Uscita dal programma. Arrivederci!");
+                System.exit(0);
+            }
+            default -> {
+                System.out.println("Scelta non valida.");
+                System.exit(1);
+            }
+        }
+
+        // Se primo accesso → cambio password obbligatorio (tipicamente volontari/admin)
+        if (auth.mustChangePassword(username)) {
+            doChangePassword(username);
+        }
+
+        // FRUITORE: entra nella CLI fruitore
+        if (auth.isFruitore(username)) {
+            FruitoreCLI fruitoreCLI = new FruitoreCLI(username, config);
+            fruitoreCLI.run();
+            return;
+        }
+
+        // VOLONTARIO (non admin): CLI volontario
+        if (auth.isVolunteer(username) && !auth.isAdmin(username)) {
+            VolunteerCLI vcli = new VolunteerCLI(auth, config, username);
+            vcli.run();
+            return;
+        }
+
+        // CONFIGURATORE: inizializzazione se necessario
+        if (!config.isInitialized()) {
+            System.out.println("\nSistema non inizializzato. Avvio wizard di configurazione iniziale...");
+            wizardCLI.runWizard();
+            config.markInitialized();
+            System.out.println("Wizard completato con successo.");
+        }
+
+        // Menu principale (configuratore)
+        mainMenu();
     }
-
-    // SE È VOLONTARIO → vai direttamente nel template volontario
-    if (auth.isVolunteer(username) && !auth.isAdmin(username)) {
-        VolunteerCLI vcli = new VolunteerCLI(auth, config, username);
-        vcli.run();
-        return; // esci dal metodo run() dopo il logout del volontario
-    }
-
-    // Se non inizializzato → wizard iniziale (solo configuratore)
-    if (!config.isInitialized()) {
-        System.out.println("\nSistema non inizializzato. Avvio wizard di configurazione iniziale...");
-        wizardCLI.runWizard();
-        config.markInitialized();
-        System.out.println("Wizard completato con successo.");
-    }
-
-    // Menu principale (solo per configuratore)
-    mainMenu();
-}
-
 
     // ================= LOGIN =====================
     public String doLogin() {
-        System.out.println("\n=== LOGIN CONFIGURATORE E VOLONTARIO===");
+        System.out.println("\n=== LOGIN CONFIGURATORE, VOLONTARIO E FRUITORE ===");
         while (true) {
             System.out.print("Username: ");
             String username = in.nextLine().trim();
@@ -114,10 +160,8 @@ public class MainCLI {
     }
 
     // =============== MENU PRINCIPALE =================
-    
-
     private void mainMenu() {
-        //Se è il 16 ci sono delle operazioni speciali da fare
+        // Se è il 16 ci sono delle operazioni speciali da fare
         if (config.isGiornoSedici()) {
             System.out.println("\nOggi è il 16 del mese.");
             System.out.print("Vuoi eseguire le operazioni del giorno 16? (s/n): ");
@@ -158,10 +202,4 @@ public class MainCLI {
             }
         }
     }
-    /*
-     * // MAIN ENTRY POINT
-     * public static void main(String[] args) {
-     * new MainCLI().run();
-     * }
-     */
 }

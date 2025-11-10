@@ -3,137 +3,235 @@ package it.unibs.visite.cli;
 import it.unibs.visite.model.*;
 import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.InitWizardService;
-import it.unibs.visite.security.AuthService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InitWizardCLI {
-    private final Scanner in;
+    private final Scanner scanner;
     private final ConfigService config;
     private final InitWizardService wizard;
 
-    //V3
-    /*private final String passwordInizialeVolontario = "123";
-    private AuthService auth;
-
-    public InitWizardCLI(Scanner in, ConfigService config, AuthService auth) {
-        this.in = in;
-        this.config = config;
-        this.auth = auth;
-        this.wizard = new InitWizardService(config);
-    }*/
-
     public InitWizardCLI(Scanner in, ConfigService config) {
-        this.in = in;
+        this.scanner = in;
         this.config = config;
         this.wizard = new InitWizardService(config);
     }
 
+
     public void runWizard() {
         System.out.println("\n=== WIZARD INIZIALIZZAZIONE ===");
 
-        // 1) Ambito territoriale
-        if (config.getSnapshot().getParametri().getAmbitoTerritoriale() == null) {
-            System.out.print("Ambito territoriale (es. 'Comune di Palermo'): ");
-            String ambito = in.nextLine();
-            config.setAmbitoUnaTantum(ambito);
+        //Imposta i parametri globali al primo avvio
+        ParametriSistema p = config.getSnapshot().getParametri();
+        if (p.isInitialized()) {
+            System.out.println("Il sistema risulta già inizializzato.");
+            return;
         } else {
-            System.out.println("Ambito già impostato: " + config.getSnapshot().getParametri().getAmbitoTerritoriale());
+            impostaParametriSistema(p);
         }
 
-        // 2) Max persone per iscrizione
-        while (true) {
+        creaLuoghiConVisiteEVolontari();
+
+        System.out.print("\nVuoi aggiungere nuovi tipi di visita a luoghi esistenti? (s/n): ");
+        if (scanner.nextLine().trim().equalsIgnoreCase("s")) {
+            aggiungiTipiVisitaALuoghiEsistenti();
+        }
+
+        System.out.print("\nVuoi aggiungere nuovi volontari o associarli a tipi di visita esistenti? (s/n): ");
+        if (scanner.nextLine().trim().equalsIgnoreCase("s")) {
+            aggiungiVolontariATipiEsistenti();
+        }
+
+        verificaInvariants();
+
+    }
+
+    // PARAMETRI DI SISTEMA
+    private void impostaParametriSistema(ParametriSistema parametri) {
+        System.out.println("\n=== Impostazione dei parametri di sistema ===");
+
+        //Ambito territoriale (una tantum)
+        while(true) {
+            System.out.print("Abmito territoriale (es: 'Provincia di Parma'): ");
+            String ambito = scanner.nextLine().trim();
+            if (ambito.isEmpty()) {
+                System.out.println("L'ambito territoriale è obbligatorio");
+                continue;
+            }
             try {
-                System.out.print("Max persone per iscrizione (>0): ");
-                int max = Integer.parseInt(in.nextLine());
-                config.setMaxPersone(max);
+                parametri.setAmbitoTerritorialeUnaTantum(ambito);
                 break;
-            } catch (Exception e) {
-                System.out.println("Valore non valido: " + e.getMessage());
+            } catch (IllegalStateException e) {
+                System.out.println("Ambito già impostato");
+                return;
             }
         }
 
-        // 3) Luoghi
-        System.out.println("\n--- Inserimento Luoghi ---");
-        while (true) {
-            System.out.print("Aggiungere un luogo? (s/n): ");
-            if (!in.nextLine().trim().equalsIgnoreCase("s")) break;
-            System.out.print("Nome luogo: "); String nome = in.nextLine();
-            System.out.print("Descrizione: "); String descr = in.nextLine();
-            Luogo l = wizard.addLuogo(nome, descr);
-            System.out.println("Creato luogo id=" + l.getId());
-        }
-
-        // 4) Volontari
-        System.out.println("\n--- Inserimento Volontari ---");
-        while (true) {
-            System.out.print("Aggiungere un volontario? (s/n): ");
-            if (!in.nextLine().trim().equalsIgnoreCase("s")) break;
-            System.out.print("Nickname (univoco): "); String nick = in.nextLine();
+        //Numero massimo persone per iscrizione
+        while(true) {
+            System.out.print("Numero massimo di persone per iscrizione: ");
+            String input = scanner.nextLine().trim();
             try {
-                Volontario v = wizard.addVolontario(nick);
-                config.getAuthService().createVolunteer(nick, config.getAuthService().getPswrdDefaultVolontario().toCharArray());;
-
-                System.out.println("Creato volontario: " + v.getNickname());
-            } catch (Exception e) {
-                System.out.println("Errore: " + e.getMessage());
+                int max = Integer.parseInt(input);
+                parametri.setMaxPersonePerIscrizione(max);
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Inserisci un numero intero valido.");
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
         }
 
-        // 5) Tipi di visita + associazione >=1 volontario
-        System.out.println("\n--- Tipi di Visita ---");
-        var luoghi = new ArrayList<>(config.getSnapshot().getLuoghi());
+        parametri.markInitialized();
+        System.out.println("\nParametri impostati correttamente.\n");
+    }
+
+    private void creaLuoghiConVisiteEVolontari() {
+        System.out.println("=== Creazione dei luoghi ===");
+        System.out.println("È necessario creare almeno un luogo per poter proseguire.");
+
+        boolean almenoUno = false;
+        while (true) {
+            System.out.print("Vuoi creare un nuovo luogo? (s/n): ");
+            String risposta = scanner.nextLine().trim();
+
+            if (risposta.isEmpty()) risposta = "n";
+            if (risposta.equalsIgnoreCase("n")) {
+                if (!almenoUno) {
+                    System.out.println("Devi creare almeno un luogo prima di continuare");
+                    continue;
+                } else return;
+            }
+
+            System.out.print("Nome del luogo: ");
+            String nome = scanner.nextLine().trim();
+            System.out.print("Descrizione (facoltativa): ");
+            String descrizione = scanner.nextLine().trim();
+            
+            Luogo luogo = new Luogo(nome, descrizione);
+            config.getSnapshot().addLuogo(luogo);
+            System.out.println("Luogo creato: " + luogo.getNome() + " (ID:" + luogo.getId() + ")");
+
+            creaTipiVisitaPerLuogo(luogo);
+            System.out.println();
+            almenoUno = true;
+        }
+    }
+
+    private void creaTipiVisitaPerLuogo(Luogo luogo) {
+        System.out.println("\n=== Creazione tipi di visita per il luogo '" + luogo.getNome() + "' ===");
+        System.out.println("Ogni luogo deve avere almeno un tipo di visita associato");
+
+        boolean almenoUno = false;
+        while(true) {
+            System.out.print("Vuoi aggiungere un tipo di visita a questo luogo? (s/n): ");
+            String risposta = scanner.nextLine().trim();
+            if (risposta.equalsIgnoreCase("n")) {
+                if (!almenoUno) {
+                    System.out.println("Ogni luogo deve avere almeno un tipo di visita");
+                    continue;
+                } else return;
+            }
+
+            System.out.print("Titolo: ");
+            String titolo = scanner.nextLine().trim();
+            System.out.print("Descrizione: ");
+            String descrizione = scanner.nextLine().trim();
+
+            TipoVisita tipo = new TipoVisita(luogo.getId(), titolo, descrizione);
+            config.getSnapshot().addTipoVisita(tipo);
+            luogo.addTipoVisita(tipo);
+
+            creaVolontariPerTipoVisita(tipo);
+            almenoUno = true;
+        }
+    }
+
+    private void creaVolontariPerTipoVisita(TipoVisita tipo) {
+        System.out.println("\n=== Assegna volontari al tipo di visita '" + tipo.getTitolo() + "' ===");
+
+        boolean almenoUno = false;
+        while (true) {
+            //Elenco volontari esistenti
+            List<String> esistenti = config.getSnapshot().getVolontari().stream()
+                    .map(Volontario::getNickname)
+                    .collect(Collectors.toList());
+            
+            if (!esistenti.isEmpty()) { System.out.println("Volontari esistenti: " + esistenti); }
+
+            System.out.print("Inserisci nickname volontario (nuovo o esistente, vuoto per terminare): ");
+            String nickname = scanner.nextLine().trim();
+            if (nickname.isEmpty()) {
+                if (almenoUno) break;
+                System.out.println("Devi associare almeno un volontario");
+                continue;
+            }
+
+            Volontario volontario;
+            if (!config.getSnapshot().volontarioEsiste(nickname)) {
+                volontario = new Volontario(nickname);
+                config.getSnapshot().addVolontario(volontario);
+                config.getAuthService().createVolunteer(nickname, config.getAuthService().getPswrdDefaultVolontario().toCharArray());
+                System.out.println("Creato nuovo volontario: " + nickname);
+            } else {
+                volontario = config.getSnapshot().getVolontario(nickname);
+            }
+
+            tipo.addVolontario(nickname, config.getSnapshot());
+            System.out.println("Volontario '" + nickname + "' associato al tipo '" + tipo.getTitolo() + ".");
+            almenoUno = true;
+        }
+
+    }
+
+    private void aggiungiTipiVisitaALuoghiEsistenti() {
+        List<Luogo> luoghi = new ArrayList<>(config.getSnapshot().getLuoghi());
         if (luoghi.isEmpty()) {
-            System.out.println("Nessun luogo: crea almeno un luogo prima.");
-        } else {
-            Map<Integer, Luogo> idx2Luogo = new LinkedHashMap<>();
-            int i = 1;
-            for (Luogo l : luoghi) { idx2Luogo.put(i, l); System.out.printf("%d) %s%n", i++, l.getNome()); }
-            while (true) {
-                System.out.print("Aggiungere un tipo di visita? (s/n): ");
-                if (!in.nextLine().trim().equalsIgnoreCase("s")) break;
-
-                int scelta;
-                while (true) {
-                    try {
-                        System.out.print("Scegli luogo (numero): ");
-                        scelta = Integer.parseInt(in.nextLine());
-                        if (!idx2Luogo.containsKey(scelta)) throw new RuntimeException();
-                        break;
-                    } catch (Exception e) { System.out.println("Scelta non valida."); }
-                }
-                Luogo l = idx2Luogo.get(scelta);
-                System.out.print("Titolo tipo visita: "); String titolo = in.nextLine();
-                System.out.print("Descrizione: "); String desc = in.nextLine();
-                TipoVisita t = wizard.addTipoVisita(l.getId(), titolo, desc);
-
-                // associa almeno un volontario
-                var volontari = new ArrayList<>(config.getSnapshot().getVolontari());
-                if (volontari.isEmpty()) {
-                    System.out.println("Attenzione: non ci sono volontari, creane almeno uno prima.");
-                } else {
-                    System.out.println("Associa volontari (almeno uno). Disponibili:");
-                    for (Volontario v : volontari) System.out.println(" - " + v.getNickname());
-                    boolean added = false;
-                    while (true) {
-                        System.out.print("Nickname volontario da associare (invio per terminare): ");
-                        String nick = in.nextLine().trim();
-                        if (nick.isEmpty()) {
-                            if (added) break;
-                            System.out.println("Devi associare almeno un volontario.");
-                            continue;
-                        }
-                        try {
-                            wizard.assocVolontarioATipo(t.getId(), nick);
-                            added = true;
-                            System.out.println("Associato.");
-                        } catch (Exception e) { System.out.println("Errore: " + e.getMessage()); }
-                    }
-                }
-            }
+            System.out.println("Nessun luogo disponibile");
+            return;
         }
 
-        // 6) Validazione invarianti
+        while(true) {
+            System.out.println("\nLuoghi disponibili: ");
+            for (int i = 0; i < luoghi.size(); i++) {
+                System.out.printf("%d) %s%n", i + 1, luoghi.get(i).getNome());
+            }
+            System.out.print("Seleziona il numero del luogo (0 per terminare): ");
+            int scelta = Integer.parseInt(scanner.nextLine().trim());
+            if (scelta <= 0 || scelta > luoghi.size()) break;
+
+            Luogo selezionato = luoghi.get(scelta - 1);
+            creaTipiVisitaPerLuogo(selezionato);
+        }
+    }
+
+    private void aggiungiVolontariATipiEsistenti() {
+        List<TipoVisita> tipi = new ArrayList<>(config.getSnapshot().getTipiVisita());
+        if (tipi.isEmpty()) {
+            System.out.println("Nessun tipo di visita disponibile.");
+            return;
+        }
+
+        while(true) {
+            System.out.println("\nTipi di visita disponibili: ");
+            for (int i = 0; i < tipi.size(); i++) {
+                TipoVisita t = tipi.get(i);
+                Luogo l = config.getSnapshot().getLuogo(t.getLuogoId());
+                String nomeLuogo = l != null ? l.getNome() : "(luogo sconosciuto)";
+                System.out.printf("%d) %s (Luogo: %s)%n", i + 1, t.getTitolo(), nomeLuogo);
+            }
+            System.out.print("Seleziona il numero del tipo di visita (0 per terminare): ");
+            int scelta = Integer.parseInt(scanner.nextLine().trim());
+            if (scelta <= 0 || scelta > tipi.size()) break;
+
+            TipoVisita selezionato = tipi.get(scelta - 1);
+            creaVolontariPerTipoVisita(selezionato);
+        }
+    }
+
+
+    private void verificaInvariants() {
         try {
             wizard.validateInvariants();
             config.markInitialized();

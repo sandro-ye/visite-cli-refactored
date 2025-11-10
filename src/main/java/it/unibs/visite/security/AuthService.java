@@ -1,6 +1,9 @@
 package it.unibs.visite.security;
 
+import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.persistence.FilePersistence;
+import it.unibs.visite.model.DataStore;
+import it.unibs.visite.model.Fruitore;
 
 public class AuthService {
     private final FilePersistence fp;
@@ -11,6 +14,7 @@ public class AuthService {
 
     public AuthService(FilePersistence fp) {
         this.fp = fp;
+
         Object saved = fp.loadCredentialsOrNull();
         if (saved == null) {
             this.creds = new CredentialsStore();
@@ -79,4 +83,19 @@ public class AuthService {
     creds.rimuoviCredenziali(nickname);
     }
 
+    // === versione 4 ===
+    public void createFruitore(String username, char[] password) {
+        creds.putNewUser(username, password, false, "FRUITORE");
+        fp.saveCredentials(creds);
+    }
+
+   
+
+    // === NUOVO: controlla ruolo fruitore ===
+    public boolean isFruitore(String username) {
+        CredentialsStore.Entry e = creds.getUsers().get(username);
+        return e != null && "FRUITORE".equalsIgnoreCase(e.role);
+    }
+
+    
 }

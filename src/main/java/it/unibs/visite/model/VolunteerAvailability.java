@@ -34,8 +34,14 @@ public final class VolunteerAvailability implements Serializable {
     }
 
     public boolean isDisponibile(LocalDate data) {
+        // Per sicurezza ed evitare residui di altri avvii
+        if (dates == null || dates.isEmpty()) {
+            return false;
+        }
         return dates.contains(data);
     }
+
+    public Set<LocalDate> getDates() { return dates; }
 }
  
     
