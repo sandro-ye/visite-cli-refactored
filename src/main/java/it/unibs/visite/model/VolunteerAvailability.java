@@ -32,6 +32,10 @@ public final class VolunteerAvailability implements Serializable {
     @Override public String toString() {
         return "Availability[" + nickname + " " + month + " -> " + dates + "]";
     }
+
+    public boolean isDisponibile(LocalDate data) {
+        return dates.contains(data);
+    }
 }
  
     

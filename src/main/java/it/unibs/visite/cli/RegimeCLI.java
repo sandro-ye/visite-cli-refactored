@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 import it.unibs.visite.model.StatoVisita;
 import it.unibs.visite.model.Visita;
+import it.unibs.visite.service.ConfigService;
 
 public class RegimeCLI {
     private final Scanner in;
@@ -112,4 +113,5 @@ public class RegimeCLI {
             else list.forEach(v -> System.out.println("  " + v));
         }
     }
+
 }

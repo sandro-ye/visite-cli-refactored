@@ -3,6 +3,7 @@ package it.unibs.visite.cli;
 import it.unibs.visite.model.*;
 import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.InitWizardService;
+import it.unibs.visite.security.AuthService;
 
 import java.util.*;
 
@@ -10,6 +11,17 @@ public class InitWizardCLI {
     private final Scanner in;
     private final ConfigService config;
     private final InitWizardService wizard;
+
+    //V3
+    /*private final String passwordInizialeVolontario = "123";
+    private AuthService auth;
+
+    public InitWizardCLI(Scanner in, ConfigService config, AuthService auth) {
+        this.in = in;
+        this.config = config;
+        this.auth = auth;
+        this.wizard = new InitWizardService(config);
+    }*/
 
     public InitWizardCLI(Scanner in, ConfigService config) {
         this.in = in;
@@ -60,6 +72,8 @@ public class InitWizardCLI {
             System.out.print("Nickname (univoco): "); String nick = in.nextLine();
             try {
                 Volontario v = wizard.addVolontario(nick);
+                config.getAuthService().createVolunteer(nick, config.getAuthService().getPswrdDefaultVolontario().toCharArray());;
+
                 System.out.println("Creato volontario: " + v.getNickname());
             } catch (Exception e) {
                 System.out.println("Errore: " + e.getMessage());

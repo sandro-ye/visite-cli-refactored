@@ -6,8 +6,10 @@ import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.InitWizardService;
 import it.unibs.visite.service.RegimeService;
 import it.unibs.visite.cli.VolunteerCLI;
+import it.unibs.visite.model.AppPhase;
 
 import java.nio.file.Paths;
+import java.time.YearMonth;
 import java.util.Scanner;
 
 //Possiamo rendere questa classe il main del programma
@@ -26,7 +28,17 @@ public class MainCLI {
         // cartella dati ~/.visite-cli
         this.persistence = new FilePersistence(Paths.get(System.getProperty("user.home"), ".visite-cli"));
         this.auth = new AuthService(persistence);
-        this.config = new ConfigService(persistence);
+        this.config = new ConfigService(persistence, auth);
+
+        // Controllo extra della fase nel caso in cui l'applicazione sia terminata in modo improvviso senza cambiare fase
+        // Dopo this.config = new ConfigService(persistence, auth);
+        YearMonth meseCorrente = YearMonth.now();
+        if (!config.isGiornoSedici() && config.getSnapshot().getFaseCorrente() != AppPhase.RACCOLTA_DISPONIBILITA) {
+            System.out.println("(Riattivo la raccolta disponibilità per il mese corrente)");
+            config.riapriRaccoltaDisponibilita(meseCorrente.plusMonths(1));
+        }
+
+        //this.wizardCLI = new InitWizardCLI(in, config, auth);
         this.wizardCLI = new InitWizardCLI(in, config);
         this.regimeCLI = new RegimeCLI(in, new RegimeService(config));
         this.volunteerCLI = new VolunteerCLI(auth, config, null);
@@ -102,7 +114,24 @@ public class MainCLI {
     }
 
     // =============== MENU PRINCIPALE =================
+    
+
     private void mainMenu() {
+        //Se è il 16 ci sono delle operazioni speciali da fare
+        if (config.isGiornoSedici()) {
+            System.out.println("\nOggi è il 16 del mese.");
+            System.out.print("Vuoi eseguire le operazioni del giorno 16? (s/n): ");
+            String risposta = in.nextLine().trim().toLowerCase();
+            if (risposta.equals("s") || risposta.equals("si")) {
+                try {
+                    new GiornoSediciCLI(config).start();
+                } catch (Exception e) {
+                    System.out.println("Errore durante le operazioni del giorno 16: " + e.getMessage());
+                    return;
+                }
+            }
+        }
+
         while (true) {
             System.out.println("\n=== MENU PRINCIPALE ===");
             System.out.println("1) Funzioni a regime");

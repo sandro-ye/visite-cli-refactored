@@ -6,6 +6,9 @@ public class AuthService {
     private final FilePersistence fp;
     private CredentialsStore creds;
 
+    private static final String pswrdDefaultVolontario = "volontario";
+    public String getPswrdDefaultVolontario() { return pswrdDefaultVolontario; }
+
     public AuthService(FilePersistence fp) {
         this.fp = fp;
         Object saved = fp.loadCredentialsOrNull();
@@ -20,6 +23,8 @@ public class AuthService {
             this.creds = (CredentialsStore) saved;
         }
     }
+
+    public CredentialsStore getCredentialsStore() { return creds; }
 
     public boolean login(String username, char[] password) {
         return creds.verify(username, password);
@@ -64,8 +69,14 @@ public class AuthService {
     public boolean isFirstLoginFlagForVolunteer(String nickname) {
     // riutilizza la stessa informazione che già uso per forzare il cambio password
     return mustChangePassword(nickname);
-}
+    }
 
+    public void rimuoviCredenziali(String nickname) {
+    if (nickname == null || nickname.isBlank()) {
+        throw new IllegalArgumentException("Nickname non valido per la rimozione delle credenziali");
+    }
 
-    
+    creds.rimuoviCredenziali(nickname);
+    }
+
 }

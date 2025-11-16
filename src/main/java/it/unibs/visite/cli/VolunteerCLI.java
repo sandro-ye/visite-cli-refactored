@@ -29,7 +29,7 @@ public final class VolunteerCLI {
         this.service = new VolunteerService(
                 auth,
                 new ConfigReadAdapter(config),
-                new FileAvailabilityRepository(Paths.get("data", "availabilities.ser")),
+                new FileAvailabilityRepository(Paths.get("data", nickname + "_availabilities.ser")),
                 Clock.systemDefaultZone()
         );
 

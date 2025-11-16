@@ -8,13 +8,15 @@ import java.util.List;
 
 import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FilePersistence;
+import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ConfigService;
 
 public class SeedDemo {
     public static void main(String[] args) {
         Path baseDir = Paths.get(System.getProperty("user.home"), ".visite-cli");
         FilePersistence persistence = new FilePersistence(baseDir);
-        ConfigService configService = new ConfigService(persistence);
+        AuthService auth = new AuthService(persistence);
+        ConfigService configService = new ConfigService(persistence, auth);
 
         DataStore ds = configService.getSnapshot();
 
@@ -61,16 +63,21 @@ public class SeedDemo {
         ds.addTipoVisita(tv3);
 
         //visite demo con stati diversi
+        Visita visita1 = new Visita("visita1", tv1.getId(), LocalDate.now().plusDays(5), 5, 40);
+        visita1.setStato(StatoVisita.PROPOSTA);
+        Visita visita2 = new Visita("visita2", tv2.getId(), LocalDate.now().plusDays(5), 5, 40);
+        visita2.setStato(StatoVisita.CONFERMATA);
+        Visita visita3 = new Visita("visita3", tv3.getId(), LocalDate.now().plusDays(5), 5, 40);
+        visita3.setStato(StatoVisita.COMPLETA);
+        Visita visita4 = new Visita("visita4", tv1.getId(), LocalDate.now().plusDays(5), 5, 40);
+        visita4.setStato(StatoVisita.CANCELLATA);
         List<Visita> visiteDemo = Arrays.asList(
-                new Visita(tv1.getId(), LocalDate.now().plusDays(5), StatoVisita.PROPOSTA),
-                new Visita(tv2.getId(), LocalDate.now().plusDays(10), StatoVisita.CONFERMATA),
-                new Visita(tv3.getId(), LocalDate.now().plusDays(15), StatoVisita.COMPLETA),
-                new Visita(tv1.getId(), LocalDate.now().plusDays(20), StatoVisita.CANCELLATA)
+                visita1, visita2, visita3, visita4
         );
 
-        visiteDemo.get(0).setVolontarioAssegnato("anna");
-        visiteDemo.get(1).setVolontarioAssegnato("mario");
-        visiteDemo.get(2).setVolontarioAssegnato("lucia");
+        visiteDemo.get(0).setVolontarioNickname("anna");
+        visiteDemo.get(1).setVolontarioNickname("mario");
+        visiteDemo.get(2).setVolontarioNickname("lucia");
 
         for (Visita v : visiteDemo) {
             ds.addVisita(v);

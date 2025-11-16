@@ -4,6 +4,7 @@ import it.unibs.visite.core.DomainException;
 import it.unibs.visite.persistence.FilePersistence;
 import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.RegimeService;
+import it.unibs.visite.security.AuthService;
 import org.junit.jupiter.api.*;
 
 import java.nio.file.Files;
@@ -16,11 +17,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RegimeServiceTest {
     
     private RegimeService regime;
+    private AuthService auth;
+
+    private FilePersistence fp;
 
     @BeforeEach
     void setUp() throws Exception {
         Path tempDir = Files.createTempDirectory("visite-preclusioni");
-        ConfigService config = new ConfigService(new FilePersistence(tempDir));
+        fp = new FilePersistence(tempDir);
+        auth = new AuthService(fp);
+        ConfigService config = new ConfigService(fp, auth);
         regime = new RegimeService(config);
     }
 

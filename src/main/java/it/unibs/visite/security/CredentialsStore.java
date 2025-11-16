@@ -44,4 +44,20 @@ public class CredentialsStore implements Serializable {
         e.hashB64 = PasswordHasher.hash(newPassword, salt);
         e.mustChangePassword = false;
     }
+
+    //Per rimuovere delle credenziali:
+    public void rimuoviCredenziali(String username) {
+    if (username == null || username.isBlank()) {
+        throw new IllegalArgumentException("Username non valido per la rimozione delle credenziali");
+    }
+
+    if (!users.containsKey(username)) {
+        System.out.println("Nessun utente con username '" + username + "' trovato, nessuna rimozione eseguita.");
+        return;
+    }
+
+    users.remove(username);
+    System.out.println("Credenziali dell'utente '" + username + "' rimosse con successo.");
+}
+
 }

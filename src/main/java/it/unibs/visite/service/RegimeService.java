@@ -16,6 +16,8 @@ public class RegimeService {
         this.configService = configService;
     }
 
+    public ConfigService getConfigService() { return configService; }
+
     /**
      * Aggiunge una preclusione per una data appartenente al mese target (YearMonth).
      * Controlla che:
