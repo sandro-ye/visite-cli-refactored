@@ -34,4 +34,35 @@ public class AuthServiceTest {
         assertFalse(auth.login("admin", "admin".toCharArray()), "login con vecchia password non dovrebbe riuscire");
         assertFalse(auth.mustChangePassword("admin"), "admin non dovrebbe essere più forzato a cambiare password");
     }
+
+    @Test
+    void testCreateAndLoginVolunteer() {
+        auth.createVolunteer("volontario1", "passVolontario".toCharArray());
+
+        assertTrue(auth.login("volontario1", "passVolontario".toCharArray()), "login con credenziali del volontario dovrebbe riuscire");
+        assertTrue(auth.mustChangePassword("volontario1"), "volontario dovrebbe essere forzato a cambiare password al primo accesso");
+        assertTrue(auth.isVolunteer("volontario1"), "volontario1 dovrebbe essere riconosciuto come VOLUNTEER");
+    }
+
+    @Test
+    void testRemoveCredentials() {
+        auth.createVolunteer("volontario2", "passVolontario2".toCharArray());
+        assertTrue(auth.login("volontario2", "passVolontario2".toCharArray()), "login con credenziali del volontario dovrebbe riuscire");
+
+        auth.rimuoviCredenziali("volontario2");
+        assertFalse(auth.login("volontario2", "passVolontario2".toCharArray()), "login dopo rimozione credenziali non dovrebbe riuscire");
+    }
+
+    @Test
+    void testInvalidRemoveCredentials() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            auth.rimuoviCredenziali(null);
+        });
+        assertEquals("Nickname non valido per la rimozione delle credenziali", exception.getMessage());
+
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            auth.rimuoviCredenziali("");
+        });
+        assertEquals("Nickname non valido per la rimozione delle credenziali", exception.getMessage());
+    }
 }
