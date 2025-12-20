@@ -82,12 +82,6 @@ public class AuthService {
         return e != null && "VOLUNTEER".equalsIgnoreCase(e.role);
     }
 
-    // metodo per verificare se è il primo login di un volontario (inutile? siccome esiste già mustChangePassword)
-    public boolean isFirstLoginFlagForVolunteer(String nickname) {
-        // riutilizza la stessa informazione che già uso per forzare il cambio password
-        return mustChangePassword(nickname);
-    }
-
     public void rimuoviCredenziali(String nickname) {
         if (nickname == null || nickname.isBlank()) {
             throw new IllegalArgumentException("Nickname non valido per la rimozione delle credenziali");
@@ -106,6 +100,4 @@ public class AuthService {
         CredentialsStore.Entry e = creds.getUsers().get(username);
         return e != null && "FRUITORE".equalsIgnoreCase(e.role);
     }
-
-    
 }
