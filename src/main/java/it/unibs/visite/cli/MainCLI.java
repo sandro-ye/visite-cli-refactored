@@ -9,6 +9,16 @@ import it.unibs.visite.service.RegistrationService;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+/**
+ * classe principale per avvio CLI dell'applicazione 
+ * - violazione single responsibility principle 
+ *    1) inizializza FilePersistence ma non dovrebbe occuparsene  
+ *    2) provare a separare login/registrazione da menu principale
+ *    3) mainCLI fa avvia classi di servizio come ConfigService e RegimeService --> da separare
+ * - modificare funzionamento della CLI e conseguente logica di business con pattern strategy
+ *  
+ */
+
 public class MainCLI {
 
     private final Scanner in = new Scanner(System.in);

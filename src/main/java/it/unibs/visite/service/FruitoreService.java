@@ -6,6 +6,15 @@ import java.util.stream.Collectors;
 import it.unibs.visite.model.*;
 import it.unibs.visite.core.Preconditions;
 
+/**
+ * Servizio per la gestione delle operazioni relative a un fruitore specifico.
+ * - restituisce visite a seconda dello stato della visita stessa 
+ * - restituisce le visite disponibili per l'iscrizione
+ * - iscrive un fruitore a una visita con vincoli su numero persone
+ * - gestisce la disdetta di un'iscrizione con vincoli su stato visita e tempistiche
+ * - restituisce le iscrizioni del fruitore
+ */
+
 public class FruitoreService {
     private final ConfigService config;
     private final Fruitore fruitore;

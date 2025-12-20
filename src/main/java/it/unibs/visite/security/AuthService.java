@@ -5,6 +5,18 @@ import it.unibs.visite.persistence.FilePersistence;
 import it.unibs.visite.model.DataStore;
 import it.unibs.visite.model.Fruitore;
 
+/**
+ * Servizio di autenticazione e gestione credenziali.
+ * - login
+ * - cambio password
+ * - creazione credenziali utenti con ruoli diversi (ADMIN, VOLUNTEER, FRUITORE)
+ * - verifica ruoli
+ * - rimozione credenziali utente
+ * 
+ * possibile unione di metodo per creare credeziali di volontario fruitore e configuratore in un unico metodo 
+ * con parametro ruolo
+ */
+
 public class AuthService {
     private final FilePersistence fp;
     private CredentialsStore creds;
@@ -70,17 +82,17 @@ public class AuthService {
         return e != null && "VOLUNTEER".equalsIgnoreCase(e.role);
     }
 
+    // metodo per verificare se è il primo login di un volontario (inutile? siccome esiste già mustChangePassword)
     public boolean isFirstLoginFlagForVolunteer(String nickname) {
-    // riutilizza la stessa informazione che già uso per forzare il cambio password
-    return mustChangePassword(nickname);
+        // riutilizza la stessa informazione che già uso per forzare il cambio password
+        return mustChangePassword(nickname);
     }
 
     public void rimuoviCredenziali(String nickname) {
-    if (nickname == null || nickname.isBlank()) {
-        throw new IllegalArgumentException("Nickname non valido per la rimozione delle credenziali");
-    }
-
-    creds.rimuoviCredenziali(nickname);
+        if (nickname == null || nickname.isBlank()) {
+            throw new IllegalArgumentException("Nickname non valido per la rimozione delle credenziali");
+        }
+        creds.rimuoviCredenziali(nickname);
     }
 
     // === versione 4 ===
@@ -88,8 +100,6 @@ public class AuthService {
         creds.putNewUser(username, password, false, "FRUITORE");
         fp.saveCredentials(creds);
     }
-
-   
 
     // === NUOVO: controlla ruolo fruitore ===
     public boolean isFruitore(String username) {

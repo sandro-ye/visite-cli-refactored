@@ -12,6 +12,11 @@ import java.util.Scanner;
 import java.util.List;
 
 /**
+ * !- da sistemare siccome nella classe vi è logica di business, mentre classe dovrebbe occuparsi solo di CLI
+ */
+
+
+/**
  * CLI per la gestione delle operazioni del giorno 16.
  * Implementa il flusso obbligatorio:
  *  1 Chiusura raccolta disponibilità + generazione piano visite
@@ -46,9 +51,9 @@ public class GiornoSediciCLI {
         try {
             
             if (configService.getSnapshot().getFaseCorrente() != AppPhase.RACCOLTA_DISPONIBILITA) {
-            System.out.println("[WARN] Fase non coerente con la generazione del piano. Ripristino RACCOLTA_DISPONIBILITA...");
-            configService.setPhase(AppPhase.RACCOLTA_DISPONIBILITA);
-}
+                System.out.println("[WARN] Fase non coerente con la generazione del piano. Ripristino RACCOLTA_DISPONIBILITA...");
+                configService.setPhase(AppPhase.RACCOLTA_DISPONIBILITA);
+            }
             List<Visita> piano = configService.chiudiDisponibilitaEGeneraPiano(meseProssimo);
             System.out.println("Piano delle visite per " + meseProssimo + " generato con successo.\n");
             stampaPiano(piano, meseProssimo);

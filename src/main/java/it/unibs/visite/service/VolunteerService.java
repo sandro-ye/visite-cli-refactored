@@ -85,7 +85,7 @@ public final class VolunteerService {
     }
 
     // ----------------- API di primo accesso: obbligo cambio password -----------------
-
+    // non viene utilizzato 
     public void mustChangePasswordOnFirstLogin(String nickname, String oldPwd, String newPwd) {
         Preconditions.notBlank(nickname, "nickname obbligatorio");
         Preconditions.notBlank(oldPwd, "password attuale obbligatoria");

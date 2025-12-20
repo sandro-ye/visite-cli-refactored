@@ -5,6 +5,12 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.*;
 
+/**
+ * DataStore principale dell'applicazione.
+ * - Contiene tutti i dati persistenti relativi a luoghi, tipi di visita,
+ * volontari, preclusioni e visite.
+ */
+
 public class DataStore implements Serializable {
     private  ParametriSistema parametri = new ParametriSistema();
     private final Map<String, Luogo> luoghi = new LinkedHashMap<>();
@@ -35,12 +41,6 @@ public class DataStore implements Serializable {
 
     // -- fruitori -- versione 4
     private final Map<String, Fruitore> fruitori = new HashMap<>();
-
-
-    
-    
-    
-    
     
     // ---- preclusioni ----
     public void setPreclusioni(YearMonth ym, Set<LocalDate> dates) {

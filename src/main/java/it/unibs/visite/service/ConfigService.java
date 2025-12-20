@@ -26,6 +26,23 @@ import it.unibs.visite.model.Visita;
 import it.unibs.visite.model.AppPhase;
 import it.unibs.visite.security.AuthService;
 
+/**
+ * Servizio per la configurazione del sistema.
+ * - gestione luoghi (aggiunte/rimozione)
+ * - gestione tipi di visita (aggiunte/rimozione/associazione volontari)
+ * - gestione volontari (aggiunte/rimozione)
+ * - controlla fase app
+ * - gestione preclusioni (controlla in che fase si è e raccoglie le preclusioni da file temporaneo FileAvailabilityRepository)
+ * e generazione del piano visite
+ * - gestione parametri di sistema (ambito territoriale, max persone per iscrizione)
+ * - setting della fase applicativa
+ * - fa da tramite tra CLI e DataStore
+ * 
+ * 
+ * classe viola interface segregation principle (da controllare)
+ */
+
+
 public class ConfigService {
     private final FilePersistence fp;
     private DataStore ds;

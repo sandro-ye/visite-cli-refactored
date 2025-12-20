@@ -2,8 +2,11 @@ package it.unibs.visite.cli;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 import it.unibs.visite.model.*;
@@ -12,6 +15,8 @@ import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ConfigService;
 
 public class SeedDemo {
+    private static final char[] password = "password".toCharArray();
+
     public static void main(String[] args) {
         Path baseDir = Paths.get(System.getProperty("user.home"), ".visite-cli");
         FilePersistence persistence = new FilePersistence(baseDir);
@@ -25,11 +30,16 @@ public class SeedDemo {
         // Parametri globali
         ds.getParametri().setAmbitoTerritorialeUnaTantum("Comune di Palermo");
         ds.getParametri().setMaxPersonePerIscrizione(10);
+        ds.getParametri().markInitialized();
 
         //volontari
         Volontario v1 = new Volontario("anna");
         Volontario v2 = new Volontario("mario");
         Volontario v3 = new Volontario("lucia");
+
+        auth.createVolunteer("anna", password);
+        auth.createVolunteer("mario", password);
+        auth.createVolunteer("lucia", password);
 
         ds.addVolontario(v1);
         ds.addVolontario(v2);
@@ -45,9 +55,27 @@ public class SeedDemo {
         ds.addLuogo(l3);
 
         //tipi visita
-        TipoVisita tv1 = new TipoVisita(l1.getId(), "Visita Cattedrale", "Visita guidata alla Cattedrale di Palermo");
-        TipoVisita tv2 = new TipoVisita(l2.getId(), "Visita Teatro", "Tour interno del Teatro Massimo");
-        TipoVisita tv3 = new TipoVisita(l3.getId(), "Visita Botanica", "Visita didattica all’Orto Botanico");
+        TipoVisita tv1 = new TipoVisita(l1.getId(), "Visita Cattedrale", "Visita guidata alla Cattedrale di Palermo", true);
+        tv1.setGiorniSettimana(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.THURSDAY));
+        tv1.setOraInizio(LocalTime.of(9, 0));
+        tv1.setDurataMinuti(120);
+        tv1.setNumeroMinimoPartecipanti(10);
+        tv1.setNumeroMassimoPartecipanti(30);
+        tv1.setBigliettoRichiesto(false);
+        TipoVisita tv2 = new TipoVisita(l2.getId(), "Visita Teatro", "Tour interno del Teatro Massimo", true);
+        tv2.setGiorniSettimana(EnumSet.of(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY));
+        tv2.setOraInizio(LocalTime.of(10, 30));
+        tv2.setDurataMinuti(90);
+        tv2.setNumeroMinimoPartecipanti(8);
+        tv2.setNumeroMassimoPartecipanti(25);
+        tv2.setBigliettoRichiesto(true);
+        TipoVisita tv3 = new TipoVisita(l3.getId(), "Visita Botanica", "Visita didattica all’Orto Botanico", true);
+        tv2.setGiorniSettimana(EnumSet.of(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY));
+        tv2.setOraInizio(LocalTime.of(10, 30));
+        tv2.setDurataMinuti(90);
+        tv2.setNumeroMinimoPartecipanti(8);
+        tv2.setNumeroMassimoPartecipanti(25);
+        tv2.setBigliettoRichiesto(true);
 
         //associa volontari
         tv1.addVolontario("anna", ds);

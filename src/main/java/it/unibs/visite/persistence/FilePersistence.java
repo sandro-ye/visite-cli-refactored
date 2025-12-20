@@ -5,6 +5,12 @@ import it.unibs.visite.model.DataStore;
 import java.io.*;
 import java.nio.file.*;
 
+/*
+classe per persistenza dati su file system
+- garantisce l'esistenza della directory dati (datastore e credentials)
+- salvataggio atomico(writeAtomic) per evitare corruzione dati (DataStore) e credenziali (CredentialsStore)
+*/
+
 public class FilePersistence {
     private final Path baseDir;
     private final Path dataFile;
@@ -36,6 +42,7 @@ public class FilePersistence {
         }
     }
 
+    // forse si può sostituire Object con CredentialsStore
     public void saveCredentials(Object creds) { writeAtomic(credFile, creds); }
 
     public Object loadCredentialsOrNull() {
