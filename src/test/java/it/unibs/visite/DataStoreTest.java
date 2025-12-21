@@ -40,6 +40,4 @@ public class DataStoreTest {
         ds.addVolontario(v1);
         assertThrows(RuntimeException.class, () -> ds.addVolontario(new Volontario("volontario1")));
     }
-
-    
 }

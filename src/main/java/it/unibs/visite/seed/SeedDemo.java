@@ -1,4 +1,4 @@
-package it.unibs.visite.cli;
+package it.unibs.visite.seed;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

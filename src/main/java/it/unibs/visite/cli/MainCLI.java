@@ -90,7 +90,8 @@ public class MainCLI {
                     }
                 }
             }
-            case "2" -> username = doLogin();
+            case "2" -> username = new LoginMenuCLI(in, auth).verify();
+            //username = doLogin();
             case "0" -> {
                 System.out.println("Uscita dal programma. Arrivederci!");
                 System.exit(0);
