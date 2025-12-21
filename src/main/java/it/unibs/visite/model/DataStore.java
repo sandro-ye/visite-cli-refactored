@@ -36,7 +36,7 @@ public class DataStore implements Serializable {
     public void setFaseCorrente(AppPhase fase) { this.faseCorrente = fase; }
 
     public Map<YearMonth, Map<String, VolunteerAvailability>> getDisponibilitaPerMese() {
-    return disponibilitaPerMese;
+        return disponibilitaPerMese;
     }
 
     // -- fruitori -- versione 4
