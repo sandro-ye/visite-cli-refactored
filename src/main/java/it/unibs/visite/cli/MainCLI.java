@@ -47,61 +47,13 @@ public class MainCLI {
         System.out.println("=== VISITE CLI  ===");
         System.out.println("(Configuratore o Volontario)\n");
 
-        String username = null;
+        String username = new LoginMenuCLI(in, auth, config, persistence).showMenu();
 
-        System.out.println("=== ACCESSO VISITE GUIDATE ===");
-        System.out.println("1) Registrati (fruitore)");
-        System.out.println("2) Accedi");
-        System.out.println("0) Esci");
-        System.out.print("> ");
-
-        String choice = in.nextLine().trim();
-        switch (choice) {
-            case "1" -> {
-                // [MODIFICA] Flusso registrazione con RegistrationService
-                while (true) {
-                    System.out.println("--- registrazione nuovo fruitore ---");
-                    System.out.print("Username: ");
-                    String desired = in.nextLine().trim();
-
-                    if (!reg.isUsernameAvailable(desired)) {
-                        System.out.println("Errore: username già in uso (presente tra credenziali o fruitori). Riprova.\n");
-                        continue;
-                    }
-
-                    System.out.print("Password: ");
-                    char[] pass1 = in.nextLine().toCharArray();
-                    System.out.print("Conferma password: ");
-                    char[] pass2 = in.nextLine().toCharArray();
-
-                    if (!new String(pass1).equals(new String(pass2))) {
-                        System.out.println("Le password non coincidono. Riprova.\n");
-                        continue;
-                    }
-
-                    try {
-                        reg.registerFruitore(desired, pass1);
-                        System.out.println("Registrazione completata. Benvenuto, " + desired + "!");
-                        username = desired; // prosegui direttamente come fruitore
-                        break;
-                    } catch (IllegalArgumentException ex) {
-                        System.out.println("Registrazione fallita: " + ex.getMessage());
-                        // ripeti ciclo
-                    }
-                }
-            }
-            case "2" -> username = new LoginMenuCLI(in, auth).verify();
-            //username = doLogin();
-            case "0" -> {
-                System.out.println("Uscita dal programma. Arrivederci!");
-                System.exit(0);
-            }
-            default -> {
-                System.out.println("Scelta non valida.");
-                System.exit(1);
-            }
+        if(username == null) {
+            System.out.println("Uscita dal programma. Arrivederci!");
+            return;
         }
-
+        
         // Se primo accesso → cambio password obbligatorio (tipicamente volontari/admin)
         if (auth.mustChangePassword(username)) {
             doChangePassword(username);
