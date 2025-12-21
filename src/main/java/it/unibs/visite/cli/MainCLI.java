@@ -27,16 +27,12 @@ public class MainCLI {
     private final ConfigService config;
     private final InitWizardCLI wizardCLI;
     private final RegimeCLI regimeCLI;
-    private final RegistrationService reg;
 
     public MainCLI() {
         // cartella dati ~/.visite-cli
         this.persistence = new FilePersistence(Paths.get(System.getProperty("user.home"), ".visite-cli"));
         this.auth = new AuthService(persistence);
         this.config = new ConfigService(persistence, auth);
-
-        // [MODIFICA] RegistrationService usa il DataStore CONDIVISO dell'applicazione
-        this.reg  = new RegistrationService(config.getSnapshot(), persistence, auth);
 
         this.wizardCLI = new InitWizardCLI(in, config);
         this.regimeCLI = new RegimeCLI(in, new RegimeService(config));
@@ -53,7 +49,7 @@ public class MainCLI {
             System.out.println("Uscita dal programma. Arrivederci!");
             return;
         }
-        
+
         // Se primo accesso → cambio password obbligatorio (tipicamente volontari/admin)
         if (auth.mustChangePassword(username)) {
             doChangePassword(username);
@@ -83,24 +79,6 @@ public class MainCLI {
 
         // Menu principale (configuratore)
         mainMenu();
-    }
-
-    // ================= LOGIN =====================
-    public String doLogin() {
-        System.out.println("\n=== LOGIN CONFIGURATORE, VOLONTARIO E FRUITORE ===");
-        while (true) {
-            System.out.print("Username: ");
-            String username = in.nextLine().trim();
-            System.out.print("Password: ");
-            char[] password = in.nextLine().toCharArray();
-
-            if (auth.login(username, password)) {
-                System.out.println("Login riuscito.");
-                return username;
-            } else {
-                System.out.println("Credenziali non valide. Riprova.");
-            }
-        }
     }
 
     // =========== Cambio password iniziale ============
