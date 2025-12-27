@@ -62,16 +62,15 @@ public class FruitoreCLI {
 
     private void mostraDisponibili() {
         List<Visita> proposte = service.visiteDisponibili();
-        if (proposte == null || proposte.isEmpty()) {
-            System.out.println("-- visite disponibili --");
-            System.out.println("nessuna visita è disponibile");
-            return;
-        }
         stampaElencoVisite("-- visite disponibili --", proposte);
     }
 
     private void stampaElencoVisite(String titolo, List<Visita> visite) {
         System.out.println(titolo);
+        if(visite == null || visite.isEmpty()) {
+            System.out.println("nessuna visita è disponibile");
+            return;
+        }
         int i = 1;
         for (Visita v : visite) {
             TipoVisita tv = config.getSnapshot().getTipoVisita(v.getTipoVisitaId());
@@ -94,12 +93,6 @@ public class FruitoreCLI {
 
     private void iscriviti() {
         List<Visita> proposte = service.visiteDisponibili();
-        if (proposte == null || proposte.isEmpty()) {
-            System.out.println("-- visite disponibili --");
-            System.out.println("nessuna visita è disponibile");
-            return; // [MODIFICA V4-CLI] non chiedere id se vuoto
-        }
-
         // Mostra elenco numerato per facilitare l'utente
         stampaElencoVisite("-- visite disponibili --", proposte);
 
@@ -139,26 +132,14 @@ public class FruitoreCLI {
             return;
         }
 
-        System.out.printf("Inserisci il numero di persone (1..%d, capienza residua: %d): ", Math.min(maxSingola, capResidua), capResidua);
-        String nstr = in.nextLine().trim();
-        int n;
-        try {
-            n = Integer.parseInt(nstr);
-        } catch (NumberFormatException e) {
-            System.out.println("Valore non numerico. Operazione annullata.");
-            return;
-        }
-        if (n < 1 || n > maxSingola) {
-            System.out.println("Numero persone fuori range per singola iscrizione. Operazione annullata.");
-            return;
-        }
-        if (n > capResidua) {
-            System.out.println("Numero persone eccede la capienza residua. Operazione annullata.");
+        int numeroIscritti = checkNumeroPartecipanti(maxSingola, capResidua);
+        if (numeroIscritti == -1) {
+            // errore di input già segnalato
             return;
         }
 
         try {
-            Iscrizione is = service.iscriviFruitoreAllaVisita(scelta.getId(), n);
+            Iscrizione is = service.iscriviFruitoreAllaVisita(scelta.getId(), numeroIscritti);
             System.out.println("Iscrizione effettuata con successo.");
             System.out.println("Codice prenotazione: " + is.getCodice());
         } catch (IllegalArgumentException | IllegalStateException ex) {
@@ -206,5 +187,26 @@ public class FruitoreCLI {
         } catch (Exception ex) {
             System.out.println("Errore imprevisto durante la disdetta: " + ex.getMessage());
         }
+    }
+
+    private int checkNumeroPartecipanti(int maxPartecipanti, int capienzaResidua) {
+        System.out.printf("Inserisci il numero di persone (1..%d, capienza residua: %d): ", Math.min(maxPartecipanti, capienzaResidua), capienzaResidua);
+        String nstr = in.nextLine().trim();
+        int n;
+        try {
+            n = Integer.parseInt(nstr);
+        } catch (NumberFormatException e) {
+            System.out.println("Valore non numerico. Operazione annullata.");
+            return -1;
+        }
+        if (n < 1 || n > maxPartecipanti) {
+            System.out.println("Numero persone fuori range per singola iscrizione. Operazione annullata.");
+            return -1;
+        }
+        if (n > capienzaResidua) {
+            System.out.println("Numero persone eccede la capienza residua. Operazione annullata.");
+            return -1;
+        }
+        return n;
     }
 }
