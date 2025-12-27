@@ -43,7 +43,9 @@ public class MainCLI {
         System.out.println("=== VISITE CLI  ===");
         System.out.println("(Configuratore o Volontario)\n");
 
-        String username = new LoginMenuCLI(in, auth, config, persistence).showMenu();
+        LoginMenuCLI loginMenu = new LoginMenuCLI(in, auth, config, persistence);
+
+        String username = loginMenu.logUser();
 
         if(username == null) {
             System.out.println("Uscita dal programma. Arrivederci!");

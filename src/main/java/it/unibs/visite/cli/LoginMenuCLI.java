@@ -18,7 +18,7 @@ public class LoginMenuCLI {
         this.reg = new RegistrationService(config.getSnapshot(), persistence, auth);
     }
 
-    public String showMenu() {
+    public String logUser() {
         System.out.println("=== ACCESSO VISITE GUIDATE ===");
         System.out.println("1) Registrati (fruitore)");
         System.out.println("2) Accedi");
@@ -32,7 +32,7 @@ public class LoginMenuCLI {
             case "0" -> null;
             default -> {
                 System.out.println("Scelta non valida. Riprova.\n");
-                yield showMenu();
+                yield logUser();
             }
         };
     }
