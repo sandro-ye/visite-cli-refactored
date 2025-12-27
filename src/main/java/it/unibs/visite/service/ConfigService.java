@@ -19,6 +19,7 @@ import it.unibs.visite.model.Luogo;
 import it.unibs.visite.model.ParametriSistema;
 import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.model.Volontario;
+import it.unibs.visite.model.AppState;
 import it.unibs.visite.persistence.AvailabilityRepository;
 import it.unibs.visite.persistence.FileAvailabilityRepository;
 import it.unibs.visite.persistence.FilePersistence;
@@ -47,6 +48,7 @@ public class ConfigService {
     private final FilePersistence fp;
     private DataStore ds;
     private AuthService authService;
+    private AppState currentState;
 
     public ConfigService(FilePersistence fp, AuthService authService) {
         this.fp = fp;
@@ -226,6 +228,15 @@ public class ConfigService {
         }
     }
 
+    //-----------------------------------------------------------------------------------------------------------
+
+    public AppState getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(AppState state) {
+        this.currentState = state;
+    }
 
     //-----------------------------------------------------------------------------------------------------------
 
@@ -264,7 +275,7 @@ public class ConfigService {
     }
 
     // Programmabilità (semplificata): giorno settimana + periodo
- public boolean existsVisitTypeProgrammableOn(String nickname, LocalDate date){
+    public boolean existsVisitTypeProgrammableOn(String nickname, LocalDate date){
         for(TipoVisita tv : ds.getTipiVisita()){
             if(tv.getVolontariNicknames().contains(nickname) &&
                tv.getGiorniSettimana().contains(date.getDayOfWeek()) &&
@@ -282,21 +293,20 @@ public class ConfigService {
     }
 
     public Set<String> visitTypeDescriptionsForVolunteer(String nickname) {
-    Volontario vol = ds.getVolontario(nickname);
-    if (vol == null) return Set.of();
+        Volontario vol = ds.getVolontario(nickname);
+        if (vol == null) return Set.of();
 
-    Set<String> result = new LinkedHashSet<>();
+        Set<String> result = new LinkedHashSet<>();
 
-    for (TipoVisita tv : ds.getTipiVisita()) {
-        if (tv.getVolontariNicknames().contains(nickname)) {
-            Luogo luogo = ds.getLuogo(tv.getLuogoId());
-            String luogoNome = (luogo != null ? luogo.getNome() : "(luogo sconosciuto)");
-            result.add(tv.getTitolo() + " @ " + luogoNome);
+        for (TipoVisita tv : ds.getTipiVisita()) {
+            if (tv.getVolontariNicknames().contains(nickname)) {
+                Luogo luogo = ds.getLuogo(tv.getLuogoId());
+                String luogoNome = (luogo != null ? luogo.getNome() : "(luogo sconosciuto)");
+                result.add(tv.getTitolo() + " @ " + luogoNome);
+            }
         }
+        return result;
     }
-
-    return result;
-}
 
 
     public Set<DayOfWeek> getProgrammableDaysForVolunteer(String nickname, YearMonth ym) {
