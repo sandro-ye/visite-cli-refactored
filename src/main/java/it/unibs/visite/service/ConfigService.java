@@ -19,7 +19,6 @@ import it.unibs.visite.model.Luogo;
 import it.unibs.visite.model.ParametriSistema;
 import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.model.Volontario;
-import it.unibs.visite.model.AppState;
 import it.unibs.visite.persistence.AvailabilityRepository;
 import it.unibs.visite.persistence.FileAvailabilityRepository;
 import it.unibs.visite.persistence.FilePersistence;
@@ -48,7 +47,6 @@ public class ConfigService {
     private final FilePersistence fp;
     private DataStore ds;
     private AuthService authService;
-    private AppState currentState;
 
     public ConfigService(FilePersistence fp, AuthService authService) {
         this.fp = fp;
@@ -226,16 +224,6 @@ public class ConfigService {
         } catch (Exception e) {
             System.err.println("[ERRORE] Impossibile aggiornare la fase applicativa: " + e.getMessage());
         }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------
-
-    public AppState getCurrentState() {
-        return currentState;
-    }
-
-    public void setCurrentState(AppState state) {
-        this.currentState = state;
     }
 
     //-----------------------------------------------------------------------------------------------------------
