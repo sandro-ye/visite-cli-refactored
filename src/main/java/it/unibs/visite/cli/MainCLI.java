@@ -24,18 +24,12 @@ public class MainCLI {
     private final FilePersistence persistence;
     private final AuthService auth;
     private final ConfigService config;
-    private final InitWizardCLI wizardCLI;
-    private final RegimeCLI regimeCLI;
 
     public MainCLI() {
         // cartella dati ~/.visite-cli
         this.persistence = new FilePersistence(Paths.get(System.getProperty("user.home"), ".visite-cli"));
         this.auth = new AuthService(persistence);
         this.config = new ConfigService(persistence, auth);
-
-        this.wizardCLI = new InitWizardCLI(in, config);
-        this.regimeCLI = new RegimeCLI(in, new RegimeService(config));
-        // Niente VolunteerCLI qui; verrà creato più avanti con l'username effettivo.
     }
 
     public void run() {
@@ -71,7 +65,7 @@ public class MainCLI {
         }
 
         // ADMIN: esegui wizard se non inizializzato
-        wizardCLI.runWizard();
+        new InitWizardCLI(in, config).runWizard();
         // Menu principale (configuratore)
         mainMenu();
     }
@@ -121,8 +115,8 @@ public class MainCLI {
 
             String choice = in.nextLine().trim();
             switch (choice) {
-                case "1" -> regimeCLI.run();
-                case "2" -> wizardCLI.runWizard();
+                case "1" -> new RegimeCLI(in, new RegimeService(config)).run();
+                case "2" -> new InitWizardCLI(in, config).runWizard();
                 case "0" -> {
                     System.out.println("Uscita dal programma. Arrivederci!");
                     System.exit(0);
