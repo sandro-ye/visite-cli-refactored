@@ -5,16 +5,13 @@ import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.InitWizardService;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InitWizardCLI {
     private final Scanner scanner;
-    private final ConfigService config;
     private final InitWizardService wizard;
 
     public InitWizardCLI(Scanner in, ConfigService config) {
         this.scanner = in;
-        this.config = config;
         this.wizard = new InitWizardService(config);
     }
 
@@ -23,12 +20,11 @@ public class InitWizardCLI {
         System.out.println("\n=== WIZARD INIZIALIZZAZIONE ===");
 
         //Imposta i parametri globali al primo avvio
-        ParametriSistema p = config.getSnapshot().getParametri();
-        if (p.isInitialized()) {
+        if (wizard.isInitialized()) {
             System.out.println("Il sistema risulta già inizializzato.");
             return;
         } else {
-            impostaParametriSistema(p);
+            impostaParametriSistema(wizard.getParametriSistema());
         }
 
         creaLuoghiConVisiteEVolontari();
@@ -110,7 +106,7 @@ public class InitWizardCLI {
             String descrizione = scanner.nextLine().trim();
             
             Luogo luogo = new Luogo(nome, descrizione);
-            config.getSnapshot().addLuogo(luogo);
+            wizard.addLuogo(luogo);
             System.out.println("Luogo creato: " + luogo.getNome() + " (ID:" + luogo.getId() + ")");
 
             creaTipiVisitaPerLuogo(luogo);
@@ -139,25 +135,21 @@ public class InitWizardCLI {
             System.out.print("Descrizione: ");
             String descrizione = scanner.nextLine().trim();
 
-            TipoVisita tipo = new TipoVisita(luogo.getId(), titolo, descrizione);
-            config.getSnapshot().addTipoVisita(tipo);
+            TipoVisita tipo = wizard.addTipoVisitaInDS(luogo.getId(), titolo, descrizione);
             luogo.addTipoVisita(tipo);
 
-            creaVolontariPerTipoVisita(tipo);
+            creaVolontariPerTipoVisita(tipo.getId(), tipo.getTitolo());
             almenoUno = true;
         }
     }
 
-    private void creaVolontariPerTipoVisita(TipoVisita tipo) {
-        System.out.println("\n=== Assegna volontari al tipo di visita '" + tipo.getTitolo() + "' ===");
+    private void creaVolontariPerTipoVisita(String tipoId, String titolo) {
+        System.out.println("\n=== Assegna volontari al tipo di visita '" + titolo + "' ===");
 
         boolean almenoUno = false;
         while (true) {
-            //Elenco volontari esistenti
-            List<String> esistenti = config.getSnapshot().getVolontari().stream()
-                    .map(Volontario::getNickname)
-                    .collect(Collectors.toList());
-            
+            List<String> esistenti = wizard.getAllVolontariNicknames();
+
             if (!esistenti.isEmpty()) { System.out.println("Volontari esistenti: " + esistenti); }
 
             System.out.print("Inserisci nickname volontario (nuovo o esistente, vuoto per terminare): ");
@@ -168,25 +160,16 @@ public class InitWizardCLI {
                 continue;
             }
 
-            Volontario volontario;
-            if (!config.getSnapshot().volontarioEsiste(nickname)) {
-                volontario = new Volontario(nickname);
-                config.getSnapshot().addVolontario(volontario);
-                config.getAuthService().createVolunteer(nickname, config.getAuthService().getPswrdDefaultVolontario().toCharArray());
-                System.out.println("Creato nuovo volontario: " + nickname);
-            } else {
-                volontario = config.getSnapshot().getVolontario(nickname);
-            }
-
-            tipo.addVolontario(nickname, config.getSnapshot());
-            System.out.println("Volontario '" + nickname + "' associato al tipo '" + tipo.getTitolo() + ".");
+            Volontario volontario = wizard.getVolontario(nickname);
+            wizard.assocVolontarioATipo(tipoId, volontario.getNickname());
+            System.out.println("Volontario '" + volontario.getNickname() + "' associato al tipo '" + titolo + ".");
             almenoUno = true;
         }
 
     }
 
     private void aggiungiTipiVisitaALuoghiEsistenti() {
-        List<Luogo> luoghi = new ArrayList<>(config.getSnapshot().getLuoghi());
+        List<Luogo> luoghi = new ArrayList<>(wizard.getSnapshot().getLuoghi());
         if (luoghi.isEmpty()) {
             System.out.println("Nessun luogo disponibile");
             return;
@@ -207,7 +190,7 @@ public class InitWizardCLI {
     }
 
     private void aggiungiVolontariATipiEsistenti() {
-        List<TipoVisita> tipi = new ArrayList<>(config.getSnapshot().getTipiVisita());
+        List<TipoVisita> tipi = new ArrayList<>(wizard.getSnapshot().getTipiVisita());
         if (tipi.isEmpty()) {
             System.out.println("Nessun tipo di visita disponibile.");
             return;
@@ -217,7 +200,7 @@ public class InitWizardCLI {
             System.out.println("\nTipi di visita disponibili: ");
             for (int i = 0; i < tipi.size(); i++) {
                 TipoVisita t = tipi.get(i);
-                Luogo l = config.getSnapshot().getLuogo(t.getLuogoId());
+                Luogo l = wizard.getSnapshot().getLuogo(t.getLuogoId());
                 String nomeLuogo = l != null ? l.getNome() : "(luogo sconosciuto)";
                 System.out.printf("%d) %s (Luogo: %s)%n", i + 1, t.getTitolo(), nomeLuogo);
             }
@@ -226,7 +209,7 @@ public class InitWizardCLI {
             if (scelta <= 0 || scelta > tipi.size()) break;
 
             TipoVisita selezionato = tipi.get(scelta - 1);
-            creaVolontariPerTipoVisita(selezionato);
+            creaVolontariPerTipoVisita(selezionato.getId(), selezionato.getTitolo());
         }
     }
 
@@ -234,7 +217,7 @@ public class InitWizardCLI {
     private void verificaInvariants() {
         try {
             wizard.validateInvariants();
-            config.markInitialized();
+            wizard.markInitialized();
             System.out.println("\nWizard completato. Sistema inizializzato.");
         } catch (Exception e) {
             System.out.println("Errore di validazione: " + e.getMessage());

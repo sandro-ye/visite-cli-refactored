@@ -5,7 +5,6 @@ import it.unibs.visite.service.FruitoreService;
 import it.unibs.visite.service.ConfigService;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * CLI del fruitore.

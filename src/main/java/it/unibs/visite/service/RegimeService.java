@@ -4,7 +4,6 @@ import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.model.*;
 
 import java.time.*;
-//import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,7 +55,7 @@ public class RegimeService {
 
     // modifica max persone (fa già save tramite ConfigService)
     public void setMaxPersone(int newMax) {
-        configService.setMaxPersone(newMax);
+        configService.getSnapshot().getParametri().setMaxPersonePerIscrizione(newMax);
     }
 
     // Visualizzazioni richieste ===================================================

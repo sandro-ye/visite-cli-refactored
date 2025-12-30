@@ -5,11 +5,11 @@ import java.util.*;
 
 public class Fruitore implements Serializable {
     private final String username;
-    private final Set<Iscrizione> mieIscrizioni = new java.util.HashSet<>();
+    private final Set<Iscrizione> mieIscrizioni = new HashSet<>();
 
-    public Fruitore(String username){ this.username = java.util.Objects.requireNonNull(username); }
+    public Fruitore(String username){ this.username = Objects.requireNonNull(username); }
     public String getUsername(){ return username; }
-    public Set<Iscrizione> getMieIscrizioni(){ return java.util.Collections.unmodifiableSet(mieIscrizioni); }
+    public Set<Iscrizione> getMieIscrizioni(){ return Collections.unmodifiableSet(mieIscrizioni); }
 
     public Iscrizione getIscrizione(String codice){
         for(Iscrizione i : mieIscrizioni){

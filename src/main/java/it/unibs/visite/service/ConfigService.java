@@ -232,27 +232,6 @@ public class ConfigService {
         return ds;
     }
 
-    public void setAmbitoUnaTantum(String ambito) {
-        Preconditions.notBlank(ambito, "Ambito non può essere vuoto");
-        ParametriSistema p = ds.getParametri();
-        p.setAmbitoTerritorialeUnaTantum(ambito);
-        save();
-    }
-
-    public void setMaxPersone(int max) {
-        ds.getParametri().setMaxPersonePerIscrizione(max);
-        save();
-    }
-
-    public boolean isInitialized() {
-        return ds.getParametri().isInitialized();
-    }
-
-    public void markInitialized() {
-        ds.getParametri().markInitialized();
-        save();
-    }
-
     public void save() {
         fp.saveData(ds);
     }

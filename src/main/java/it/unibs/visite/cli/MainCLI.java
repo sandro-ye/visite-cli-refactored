@@ -4,7 +4,6 @@ import it.unibs.visite.persistence.FilePersistence;
 import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.RegimeService;
-import it.unibs.visite.service.RegistrationService;
 
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -71,14 +70,8 @@ public class MainCLI {
             return;
         }
 
-        // CONFIGURATORE: inizializzazione se necessario
-        if (!config.isInitialized()) {
-            System.out.println("\nSistema non inizializzato. Avvio wizard di configurazione iniziale...");
-            wizardCLI.runWizard();
-            config.markInitialized();
-            System.out.println("Wizard completato con successo.");
-        }
-
+        // ADMIN: esegui wizard se non inizializzato
+        wizardCLI.runWizard();
         // Menu principale (configuratore)
         mainMenu();
     }
@@ -129,14 +122,7 @@ public class MainCLI {
             String choice = in.nextLine().trim();
             switch (choice) {
                 case "1" -> regimeCLI.run();
-                case "2" -> {
-                    if (!config.isInitialized()) {
-                        wizardCLI.runWizard();
-                        config.markInitialized();
-                    } else {
-                        System.out.println("Il wizard è già stato completato e non può essere rieseguito.");
-                    }
-                }
+                case "2" -> wizardCLI.runWizard();
                 case "0" -> {
                     System.out.println("Uscita dal programma. Arrivederci!");
                     System.exit(0);
