@@ -83,9 +83,28 @@ public class LoginMenuCLI {
 
             if (auth.login(username, password)) {
                 System.out.println("Login riuscito.");
+                if(auth.mustChangePassword(username)) changePass(username);
                 return username;
             } else {
                 System.out.println("Credenziali non valide. Riprova.");
+            }
+        }
+    }
+
+    private void changePass(String username) {
+        System.out.println("\nCambio password obbligatorio (primo accesso).");
+        while (true) {
+            System.out.print("Nuova password: ");
+            char[] pass1 = in.nextLine().toCharArray();
+            System.out.print("Conferma nuova password: ");
+            char[] pass2 = in.nextLine().toCharArray();
+
+            if (new String(pass1).equals(new String(pass2))) {
+                auth.changePassword(username, pass1);
+                System.out.println("Password cambiata con successo.");
+                break;
+            } else {
+                System.out.println("Le password non coincidono. Riprova.");
             }
         }
     }

@@ -44,12 +44,7 @@ public class MainCLI {
             System.out.println("Uscita dal programma. Arrivederci!");
             return;
         }
-
-        // Se primo accesso → cambio password obbligatorio (tipicamente volontari/admin)
-        if (auth.mustChangePassword(username)) {
-            doChangePassword(username);
-        }
-
+        
         // FRUITORE: entra nella CLI fruitore
         if (auth.isFruitore(username)) {
             FruitoreCLI fruitoreCLI = new FruitoreCLI(username, config);
@@ -68,25 +63,6 @@ public class MainCLI {
         new InitWizardCLI(in, config).runWizard();
         // Menu principale (configuratore)
         mainMenu();
-    }
-
-    // =========== Cambio password iniziale ============
-    private void doChangePassword(String username) {
-        System.out.println("\nCambio password obbligatorio (primo accesso).");
-        while (true) {
-            System.out.print("Nuova password: ");
-            char[] pass1 = in.nextLine().toCharArray();
-            System.out.print("Conferma nuova password: ");
-            char[] pass2 = in.nextLine().toCharArray();
-
-            if (new String(pass1).equals(new String(pass2))) {
-                auth.changePassword(username, pass1);
-                System.out.println("Password cambiata con successo.");
-                break;
-            } else {
-                System.out.println("Le password non coincidono. Riprova.");
-            }
-        }
     }
 
     // =============== MENU PRINCIPALE =================
