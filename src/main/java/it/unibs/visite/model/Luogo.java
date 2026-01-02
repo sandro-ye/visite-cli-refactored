@@ -27,6 +27,10 @@ public class Luogo implements Serializable {
         tipiVisitaIds.add(tipoVisita.getId());
     }
 
+    public void removeTipoVisita(TipoVisita tipoVisita) {
+        tipiVisitaIds.remove(tipoVisita.getId());
+    }
+
     @Override
     public String toString() {
         return "Luogo{" + id + ", " + nome + "}";
