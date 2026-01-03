@@ -4,7 +4,7 @@ import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.repository.TipoVisitaRepository;
 import java.util.*;
 
-public class InMemoryTipoVIsitaRepository implements TipoVisitaRepository {
+public class InMemoryTipoVisitaRepository implements TipoVisitaRepository {
     private final Map<String, TipoVisita> storage = new HashMap<>();
     
     @Override
