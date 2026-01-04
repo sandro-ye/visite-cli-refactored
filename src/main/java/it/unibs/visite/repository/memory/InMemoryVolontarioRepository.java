@@ -1,10 +1,11 @@
 package it.unibs.visite.repository.memory;
 
+import java.io.Serializable;
 import java.util.*;
 import it.unibs.visite.model.Volontario;
 import it.unibs.visite.repository.VolontarioRepository;
 
-public class InMemoryVolontarioRepository implements VolontarioRepository {
+public class InMemoryVolontarioRepository implements VolontarioRepository, Serializable {
     private final Map<String, Volontario> storage = new HashMap<>();
     
     @Override

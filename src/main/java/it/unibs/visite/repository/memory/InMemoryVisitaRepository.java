@@ -1,10 +1,11 @@
 package it.unibs.visite.repository.memory;
 
+import java.io.Serializable;
 import java.util.*;
 import it.unibs.visite.model.Visita;
 import it.unibs.visite.repository.VisitaRepository;
 
-public class InMemoryVisitaRepository implements VisitaRepository {
+public class InMemoryVisitaRepository implements VisitaRepository, Serializable {
     private final Map<String, Visita> storage = new HashMap<>();
     
     @Override

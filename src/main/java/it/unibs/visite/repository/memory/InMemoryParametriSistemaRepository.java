@@ -1,9 +1,12 @@
 package it.unibs.visite.repository.memory;
 
 import it.unibs.visite.repository.ParametriSistemaRepository;
+
+import java.io.Serializable;
+
 import it.unibs.visite.model.ParametriSistema;
 
-public class InMemoryParametriSistemaRepository implements ParametriSistemaRepository{
+public class InMemoryParametriSistemaRepository implements ParametriSistemaRepository, Serializable{
     private ParametriSistema parametri;
 
     @Override

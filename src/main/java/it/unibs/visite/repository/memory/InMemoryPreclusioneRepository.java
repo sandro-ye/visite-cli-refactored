@@ -1,13 +1,14 @@
 package it.unibs.visite.repository.memory;
 
 import java.util.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.stream.Collectors;
 
 import it.unibs.visite.repository.PreclusioneRepository;
 
-public class InMemoryPreclusioneRepository implements PreclusioneRepository {
+public class InMemoryPreclusioneRepository implements PreclusioneRepository, Serializable {
     private final Set<LocalDate> preclusioni = new HashSet<>();
 
     @Override
