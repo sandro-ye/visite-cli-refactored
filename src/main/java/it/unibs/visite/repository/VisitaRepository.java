@@ -6,6 +6,6 @@ import it.unibs.visite.model.Visita;
 public interface VisitaRepository {
     void save(Visita visita);
     Collection<Visita> findAll();
-    Optional<Visita> findByCodiceIscrizione(String codiceIscrizione);
-    void deleteByCodiceIscrizione(String codiceIscrizione);
+    Optional<Visita> find(String idString);
+    void delete(String idString);
 }

@@ -19,12 +19,12 @@ public class InMemoryVisitaRepository implements VisitaRepository, Serializable 
     }
 
     @Override
-    public Optional<Visita> findByCodiceIscrizione(String codiceIscrizione) {
-        return Optional.ofNullable(storage.get(codiceIscrizione));
+    public Optional<Visita> find(String idString) {
+        return Optional.ofNullable(storage.get(idString));
     }
 
     @Override
-    public void deleteByCodiceIscrizione(String codiceIscrizione) {
-        storage.remove(codiceIscrizione);
+    public void delete(String idString) {
+        storage.remove(idString);
     }
 }
