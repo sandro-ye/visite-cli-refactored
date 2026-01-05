@@ -1,15 +1,58 @@
 package it.unibs.visite.service;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.model.*;
+import it.unibs.visite.persistence.FileRepositoryPersistence;
+import it.unibs.visite.repository.ParametriSistemaRepository;
+import it.unibs.visite.repository.memory.InMemoryParametriSistemaRepository;
 
-public class InitWizardService {
+public class InitWizardService{
     private final ConfigService config;
+    private final ParametriSistemaRepository parametriSistemaRepository;
 
-    public InitWizardService(ConfigService config) { this.config = config; }
+    public InitWizardService(ConfigService config) { 
+        this.config = config;
+        this.parametriSistemaRepository = FileRepositoryPersistence.caricaOggetto(
+            Paths.get("data", "parametri-sistema.ser"),
+            InMemoryParametriSistemaRepository::new
+        );
+    }
+
+    public void esegui(String ambito, int maxPersonePerIscrizione) {
+        ParametriSistema p = parametriSistemaRepository.load();
+
+        if(p.isInitialized()) {
+            throw new IllegalStateException("Parametri di sistema già inizializzati");
+        }
+        if(maxPersonePerIscrizione <= 0) {
+            throw new IllegalArgumentException("Il numero massimo di persone per iscrizione deve essere > 0");
+        }
+
+        p.setAmbitoTerritorialeUnaTantum(ambito);
+        p.setMaxPersonePerIscrizione(maxPersonePerIscrizione);
+        p.markInitialized();
+
+        parametriSistemaRepository.save(p);
+
+        FileRepositoryPersistence.salvaOggetto(parametriSistemaRepository, 
+                Paths.get("data", "parametri-sistema.ser"));
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     public Luogo addLuogo(String nome, String descrizione) {
         Preconditions.notBlank(nome, "Nome luogo obbligatorio");

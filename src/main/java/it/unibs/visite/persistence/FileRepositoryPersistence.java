@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 public class FileRepositoryPersistence {
 
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T caricaOggetto(Path filename, Supplier<T> defaultSupplier) {
         // Implementazione del caricamento da file
         try(ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(filename))) {
