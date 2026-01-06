@@ -1,8 +1,6 @@
 package it.unibs.visite.cli;
 
-import it.unibs.visite.Main;
 import it.unibs.visite.persistence.FileAvailabilityRepository;
-import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.VolunteerService;
 import it.unibs.visite.service.adapters.ConfigReadAdapter;
 import it.unibs.visite.service.ConfigService;  //già in V1
@@ -17,17 +15,14 @@ import java.util.*;
 public final class VolunteerCLI {
 
     private final Scanner in = new Scanner(System.in);
-    private final AuthService auth;
     private final ConfigService config;
     private final String nickname; // utente già autenticato
     private final VolunteerService service;
 
-    public VolunteerCLI(AuthService auth, ConfigService config, String nickname) {
-        this.auth = auth;
+    public VolunteerCLI(ConfigService config, String nickname) {
         this.config = config;
         this.nickname = nickname;
         this.service = new VolunteerService(
-                auth,
                 new ConfigReadAdapter(config),
                 new FileAvailabilityRepository(Paths.get("data", nickname + "_availabilities.ser")),
                 Clock.systemDefaultZone()
@@ -37,29 +32,12 @@ public final class VolunteerCLI {
 
     public void run() {
         System.out.println("=== Area VOLONTARIO ===");
-        //String nick = loginFlow();
         try {
             mainMenu(nickname);
         } finally {
             System.out.println("Logout eseguito.\n");
         }
     }
-
-    //  private String loginFlow() {
-    //     while (true) {
-    //         System.out.print("Nickname: ");
-    //         String nick = in.nextLine().trim();
-    //         System.out.print("Password: ");
-    //         char[] pwd = System.console() != null ?
-    //                 System.console().readPassword() :
-    //                 in.nextLine().toCharArray();
-    //         if (auth.login(nick, pwd) && auth.isVolunteer(nick)) {
-    //             return nick;
-    //         } else {
-    //             System.out.println("Credenziali non valide o utente non è un volontario. Riprova.");
-    //         }
-    //     }
-    // }
 
     private void mainMenu(String nick) {
         while (true) {

@@ -1,6 +1,5 @@
 package it.unibs.visite.service;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;

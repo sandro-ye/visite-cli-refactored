@@ -6,17 +6,14 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashSet;
 import java.util.Set;
-//import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.model.DataStore;
 import it.unibs.visite.model.Luogo;
-import it.unibs.visite.model.ParametriSistema;
 import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.model.Volontario;
 import it.unibs.visite.persistence.AvailabilityRepository;
@@ -277,15 +274,15 @@ public class ConfigService {
 
 
     public Set<DayOfWeek> getProgrammableDaysForVolunteer(String nickname, YearMonth ym) {
-    Volontario vol = ds.getVolontario(nickname);
-    if (vol == null) return Set.of();
+        Volontario vol = ds.getVolontario(nickname);
+        if (vol == null) return Set.of();
 
     // Al momento il dominio NON modella:
     // - giorni settimanali ammessi per ciascun tipo di visita
     // - validità nel mese
     // quindi non possiamo calcolare delle informazioni reali qui.
 
-    return Set.of();
+        return Set.of();
     }
 
 

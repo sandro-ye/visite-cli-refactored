@@ -1,10 +1,7 @@
 package it.unibs.visite.service;
 
-//import it.unibs.visite.model.VolunteerAvailability;
 import it.unibs.visite.persistence.AvailabilityRepository;
-import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ports.ConfigReadPort;
-//import it.unibs.visite.core.DomainException;
 import it.unibs.visite.core.Preconditions;
 
 import java.io.IOException;
@@ -16,13 +13,11 @@ import java.util.TreeSet;
 
 public final class VolunteerService {
 
-    private final AuthService auth;                     // già presente in V1
     private final ConfigReadPort config;                // adapter su ConfigService
     private final AvailabilityRepository repo;          // nuovo per V2
     private final Clock clock;                          // per testabilità
 
-    public VolunteerService(AuthService auth, ConfigReadPort config, AvailabilityRepository repo, Clock clock) {
-        this.auth = Preconditions.notNull(auth, "auth");
+    public VolunteerService(ConfigReadPort config, AvailabilityRepository repo, Clock clock) {
         this.config = Preconditions.notNull(config, "config");
         this.repo = Preconditions.notNull(repo, "repo");
         this.clock = Preconditions.notNull(clock, "clock");
@@ -47,7 +42,6 @@ public final class VolunteerService {
     /** Inserisce nuove date (si uniscono a quelle già registrate). */
     public void declareAvailability(String nickname, List<LocalDate> dates) throws IOException {
         Preconditions.notBlank(nickname, "nickname obbligatorio");
-        Preconditions.check(auth.isVolunteer(nickname), "utente non autenticato come volontario");
 
         YearMonth target = nextMonth();
         Set<LocalDate> cleaned = new LinkedHashSet<>();
@@ -82,15 +76,5 @@ public final class VolunteerService {
 
     private static void validateSingleDateBelongsToMonth(YearMonth ym, LocalDate d) {
         Preconditions.check(YearMonth.from(d).equals(ym), "La data " + d + " non appartiene al mese " + ym);
-    }
-
-    // ----------------- API di primo accesso: obbligo cambio password -----------------
-    // non viene utilizzato 
-    public void mustChangePasswordOnFirstLogin(String nickname, String oldPwd, String newPwd) {
-        Preconditions.notBlank(nickname, "nickname obbligatorio");
-        Preconditions.notBlank(oldPwd, "password attuale obbligatoria");
-        Preconditions.notBlank(newPwd, "nuova password obbligatoria");
-        Preconditions.check(auth.mustChangePassword(nickname), "credenziali iniziali errate o già cambiate");
-        auth.changePassword(nickname, newPwd.toCharArray());
     }
 }

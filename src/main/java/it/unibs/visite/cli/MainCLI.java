@@ -54,7 +54,7 @@ public class MainCLI {
 
         // VOLONTARIO (non admin): CLI volontario
         if (auth.isVolunteer(username) && !auth.isAdmin(username)) {
-            VolunteerCLI vcli = new VolunteerCLI(auth, config, username);
+            VolunteerCLI vcli = new VolunteerCLI(config, username);
             vcli.run();
             return;
         }

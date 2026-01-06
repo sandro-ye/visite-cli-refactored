@@ -1,9 +1,7 @@
 package it.unibs.visite.security;
 
-import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.persistence.FilePersistence;
-import it.unibs.visite.model.DataStore;
-import it.unibs.visite.model.Fruitore;
+import it.unibs.visite.model.LoginResult;
 
 /**
  * Servizio di autenticazione e gestione credenziali.
@@ -42,8 +40,14 @@ public class AuthService {
 
     public CredentialsStore getCredentialsStore() { return creds; }
 
-    public boolean login(String username, char[] password) {
-        return creds.verify(username, password);
+    public LoginResult login(String username, char[] password) {
+        if(!creds.verify(username, password)) {
+            return LoginResult.FAILURE;
+        } 
+        if(mustChangePassword(username)) {
+            return LoginResult.FIRST_ACCESS;
+        }
+        return LoginResult.SUCCESS;
     }
 
     public boolean mustChangePassword(String username) {
@@ -51,8 +55,11 @@ public class AuthService {
         return e != null && e.mustChangePassword;
     }
 
-    public void changePassword(String username, char[] newPassword) {
-        creds.changePassword(username, newPassword);
+    public void changePassword(String username, char[] pass1, char[] pass2) {
+        if(!new String(pass1).equals(new String(pass2))) {
+            throw new IllegalArgumentException("Password non corrispondenti");
+        }
+        creds.changePassword(username, pass1);
         fp.saveCredentials(creds);
     }
 
