@@ -1,9 +1,10 @@
 package it.unibs.visite.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class DisponibilitaVolontario {
+public class DisponibilitaVolontario implements Serializable{
     private final LocalDate data;
 
     public DisponibilitaVolontario(LocalDate data) {
