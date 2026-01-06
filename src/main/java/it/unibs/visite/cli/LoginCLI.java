@@ -5,9 +5,6 @@ import java.util.Scanner;
 import it.unibs.visite.controller.LoginController;
 import it.unibs.visite.model.LoginResult;
 
-/**
- * da aggiungere cli per cambio password
- */
 public class LoginCLI {
     private final LoginController loginController;
     private final Scanner in;
