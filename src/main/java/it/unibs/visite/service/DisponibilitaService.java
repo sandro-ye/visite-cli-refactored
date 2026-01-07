@@ -68,17 +68,24 @@ public class DisponibilitaService {
         FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
     }
 
-    public List<DisponibilitaVolontario> getDisponibilitaDi(String nickname) {
+    public List<DisponibilitaVolontario> getDisponibilitaDi(String nickname, YearMonth mese) {
         Volontario volontario = getVolontarioByNickname(nickname);
-        return volontario.getDisponibilita().stream().toList();
+        return volontario.getDisponibilita().stream().filter(d -> YearMonth.from(d.getData()).equals(mese)).toList();
     }
 
     public List<TipoVisita> getAllTipiVisita(String nickname) {
         Volontario volontario = getVolontarioByNickname(nickname);
         return volontario.getTipiVisitaCompetenza().stream().toList();
     }
+
+    public List<String> getAllTipiVisitaDescription(String nickname) {
+        Volontario volontario = getVolontarioByNickname(nickname);
+        return volontario.getTipiVisitaCompetenza().stream()
+                .map(TipoVisita::getDescrizione)
+                .toList();
+    }
     
-    private YearMonth nextMonth() {
+    public YearMonth nextMonth() {
         LocalDate today = LocalDate.now();
         return YearMonth.from(today.plusMonths(1).withDayOfMonth(1));
     }

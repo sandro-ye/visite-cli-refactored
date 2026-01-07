@@ -4,6 +4,7 @@ import it.unibs.visite.model.DisponibilitaVolontario;
 import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.service.DisponibilitaService;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 public class VolunteerController {
@@ -13,8 +14,8 @@ public class VolunteerController {
         this.disponibilitaService = disponibilitaService;
     }
 
-    public List<DisponibilitaVolontario> visualizzaDisponibilita(String nickname) {
-        return disponibilitaService.getDisponibilitaDi(nickname);
+    public List<DisponibilitaVolontario> visualizzaDisponibilita(String nickname, YearMonth mese) {
+        return disponibilitaService.getDisponibilitaDi(nickname, mese);
     }
 
     public void revocaDisponibilita(String nickname, LocalDate data) {
@@ -27,5 +28,9 @@ public class VolunteerController {
 
     public List<TipoVisita> visualizzaTipiVisita(String nickname) {
         return disponibilitaService.getAllTipiVisita(nickname);
+    }
+
+    public YearMonth meseSuccessivo() {
+        return disponibilitaService.nextMonth();
     }
 }
