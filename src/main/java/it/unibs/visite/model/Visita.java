@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 
+/*
+    - rimuovi attributi non necessari (max e min partecipanti duplicati da TipoVisita)
+*/
+
 public class Visita implements Serializable {
     private final String id;
     private final String tipoVisitaId;

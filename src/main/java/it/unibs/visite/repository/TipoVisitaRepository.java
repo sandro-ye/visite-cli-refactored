@@ -1,8 +1,6 @@
 package it.unibs.visite.repository;
 
-import java.util.Optional;
-import java.util.Collection;
-
+import java.util.*;
 import it.unibs.visite.model.TipoVisita;
 
 public interface TipoVisitaRepository {

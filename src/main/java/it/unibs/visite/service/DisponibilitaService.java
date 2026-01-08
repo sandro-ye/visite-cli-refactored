@@ -18,7 +18,7 @@ public class DisponibilitaService {
     private final PreclusioneRepository preclusioneRepository;
     private final VolontarioRepository volontarioRepository;
 
-    public DisponibilitaService(PreclusioneRepository preclusioneRepository, VolontarioRepository volontarioRepository) {
+    public DisponibilitaService() {
         this.preclusioneRepository = FileRepositoryPersistence.caricaOggetto(
             Paths.get("data", "preclusioni.ser"),
             InMemoryPreclusioneRepository::new);
@@ -37,8 +37,7 @@ public class DisponibilitaService {
         }
         volontario.addDisponibilita(data);
         volontarioRepository.save(volontario);
-
-        FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
+        salva();
     }
 
     public boolean verificaDisponibilita(String nickname, LocalDate data) {
@@ -65,7 +64,7 @@ public class DisponibilitaService {
         Volontario volontario = getVolontarioByNickname(nickname);
         volontario.removeDisponibilita(data);
         volontarioRepository.save(volontario);
-        FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
+        salva();
     }
 
     public List<DisponibilitaVolontario> getDisponibilitaDi(String nickname, YearMonth mese) {
@@ -93,5 +92,9 @@ public class DisponibilitaService {
     private Volontario getVolontarioByNickname(String nickname) {
         return volontarioRepository.findByNickname(nickname)
                 .orElseThrow(() -> new DomainException("Volontario non esistente"));
+    }
+
+    private void salva() {
+        FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
     }
 }
