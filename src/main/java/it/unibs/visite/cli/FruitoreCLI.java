@@ -1,9 +1,7 @@
 package it.unibs.visite.cli;
 
+import it.unibs.visite.controller.FruitoreController;
 import it.unibs.visite.model.*;
-import it.unibs.visite.service.FruitoreService;
-import it.unibs.visite.service.ConfigService;
-
 import java.util.*;
 
 /**
@@ -17,21 +15,13 @@ import java.util.*;
 public class FruitoreCLI {
 
     private final String username;
-    private final ConfigService config;
-    private final FruitoreService service;
-    private final Scanner in = new Scanner(System.in);
+    private final Scanner in;
+    private final FruitoreController controller;
 
-    public FruitoreCLI(String username, ConfigService config) {
+    public FruitoreCLI(FruitoreController controller, String username, Scanner in) {
+        this.controller = controller;
         this.username = username;
-        this.config = config;
-        // Recupera/crea il profilo Fruitore dal DataStore
-        Fruitore f = config.getSnapshot().getFruitore(username);
-        if (f == null) {
-            f = new Fruitore(username);
-            config.getSnapshot().addFruitore(f);
-            config.save();
-        }
-        this.service = new FruitoreService(config, f);
+        this.in = in;
     }
 
     public void run() {
@@ -58,21 +48,21 @@ public class FruitoreCLI {
             }
         }
     }
-
+    
     private void mostraDisponibili() {
-        List<Visita> proposte = service.visiteDisponibili();
-        stampaElencoVisite("-- visite disponibili --", proposte);
+        List<Visita> proposte = controller.visualizzaVisiteDisponibili();
+        System.out.println("-- visite disponibili --");
+        stampaElencoVisite(proposte);
     }
 
-    private void stampaElencoVisite(String titolo, List<Visita> visite) {
-        System.out.println(titolo);
-        if(visite == null || visite.isEmpty()) {
+    private void stampaElencoVisite(List<Visita> visite) {
+        if (visite == null || visite.isEmpty()) {
             System.out.println("nessuna visita è disponibile");
             return;
         }
         int i = 1;
         for (Visita v : visite) {
-            TipoVisita tv = config.getSnapshot().getTipoVisita(v.getTipoVisitaId());
+            TipoVisita tv = controller.getTipoVisitaById(v.getTipoVisitaId());
             String biglietto = tv.getBigliettoRichiesto() ? " | biglietto richiesto" : "";
             System.out.printf("%d) id=%s | %s — %s %s | punto: %s | min %d, max %d%s%n",
                     i++,
@@ -89,6 +79,69 @@ public class FruitoreCLI {
     }
 
     private String safe(String s) { return (s == null ? "-" : s); }
+
+    private void iscriviti() {
+        mostraDisponibili();
+        System.out.print("\nInserisci l'id della visita a cui iscriversi: ");
+        String idVisita = in.nextLine().trim();
+        System.out.printf("Inserisci il numero di persone da iscrivere (max: %d): ", 
+                controller.getMaxPersonePerIscrizione());
+        int numeroPersone = Integer.parseInt(in.nextLine().trim());
+        controller.iscriviAVisita(username, idVisita, numeroPersone);
+    }
+
+    private void mieIscrizioni() {  
+        System.out.println("-- le mie iscrizioni --");
+        List<Iscrizione> mie = controller.getIscrizioniDi(username);
+        stampaElencoIscrizioni(mie);
+    }
+
+    private void stampaElencoIscrizioni(List<Iscrizione> iscrizioni) {
+        if (iscrizioni == null || iscrizioni.isEmpty()) {
+            System.out.println("nessuna iscrizione trovata");
+            return;
+        }
+        int i = 1;
+        for (Iscrizione is : iscrizioni) {
+            Visita v = controller.getVisitaByCodiceIscrizione(username, is.getCodice());
+            if (v == null) continue; // in caso sia finita in archivio o rimossa
+            TipoVisita tv = controller.getTipoVisitaById(v.getTipoVisitaId());
+            System.out.printf("%d) codice=%s | %s — %s %s | persone=%d | stato=%s%n",
+                    i++,
+                    is.getCodice(),
+                    tv.getTitolo(),
+                    v.getData(),
+                    tv.getOraInizio(),
+                    is.getNumeroPersone(),
+                    v.getStato()
+            );
+        }
+    }
+
+    private void disdici() {
+        mieIscrizioni();
+        System.out.println("-- disdetta iscrizione --");
+        System.out.print("Inserisci il codice prenotazione: ");
+        String codice = in.nextLine().trim();
+        controller.disdiciIscrizione(username, codice);
+    }
+
+
+    /*
+    
+    public FruitoreCLI(String username, ConfigService config) {
+        this.username = username;
+        this.config = config;
+        // Recupera/crea il profilo Fruitore dal DataStore
+        Fruitore f = config.getSnapshot().getFruitore(username);
+        if (f == null) {
+            f = new Fruitore(username);
+            config.getSnapshot().addFruitore(f);
+            config.save();
+        }
+        this.service = new FruitoreService(config, f);
+    }
+        
 
     private void iscriviti() {
         List<Visita> proposte = service.visiteDisponibili();
@@ -149,45 +202,6 @@ public class FruitoreCLI {
         }
     }
 
-    private void mieIscrizioni() {
-        List<Iscrizione> mie = service.mieIscrizioni();
-        if (mie == null || mie.isEmpty()) {
-            System.out.println("-- le mie iscrizioni --");
-            System.out.println("(nessuna)");
-            return;
-        }
-        System.out.println("-- le mie iscrizioni --");
-        int i = 1;
-        for (Iscrizione is : mie) {
-            Visita v = config.getSnapshot().getVisita(is.getCodiceVisitaAssociato());
-            if (v == null) continue; // in caso sia finita in archivio o rimossa
-            TipoVisita tv = config.getSnapshot().getTipoVisita(v.getTipoVisitaId());
-            System.out.printf("%d) codice=%s | %s — %s %s | persone=%d | stato=%s%n",
-                    i++,
-                    is.getCodice(),
-                    tv.getTitolo(),
-                    v.getData(),
-                    tv.getOraInizio(),
-                    is.getNumeroPersone(),
-                    v.getStato()
-            );
-        }
-    }
-
-    private void disdici() {
-        System.out.println("-- disdetta iscrizione --");
-        System.out.print("Inserisci il codice prenotazione: ");
-        String codice = in.nextLine().trim();
-        try {
-            service.disdiciIscrizione(codice);
-            System.out.println("Disdetta effettuata.");
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            System.out.println("Disdetta rifiutata: " + ex.getMessage());
-        } catch (Exception ex) {
-            System.out.println("Errore imprevisto durante la disdetta: " + ex.getMessage());
-        }
-    }
-
     private int checkNumeroPartecipanti(int maxPartecipanti, int capienzaResidua) {
         System.out.printf("Inserisci il numero di persone (1..%d, capienza residua: %d): ", Math.min(maxPartecipanti, capienzaResidua), capienzaResidua);
         String nstr = in.nextLine().trim();
@@ -208,4 +222,5 @@ public class FruitoreCLI {
         }
         return n;
     }
+    */
 }

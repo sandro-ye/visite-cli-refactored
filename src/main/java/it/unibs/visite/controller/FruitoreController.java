@@ -27,10 +27,18 @@ public class FruitoreController {
     }
 
     public List<Iscrizione> getIscrizioniDi(String usernameFruitore) {
-        return fruitoreService.getIscrizioniDi(usernameFruitore);
+        return fruitoreService.getIscrizioniDi(usernameFruitore);  
     }
 
     public void disdiciIscrizione(String usernameFruitore, String codiceIscrizione) {
         fruitoreService.disdiciIscrizione(usernameFruitore, codiceIscrizione);
+    }
+
+    public int getMaxPersonePerIscrizione() {
+        return fruitoreService.getMaxPersonePerIscrizione();
+    }
+
+    public Visita getVisitaByCodiceIscrizione(String usernameFruitore, String codiceIscrizione) {
+        return fruitoreService.getVisitaByCodiceIscrizione(usernameFruitore, codiceIscrizione);
     }
 }

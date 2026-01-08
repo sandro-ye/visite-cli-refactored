@@ -2,39 +2,16 @@ package it.unibs.visite.cli;
 
 import it.unibs.visite.controller.VolunteerController;
 import it.unibs.visite.model.TipoVisita;
-//import it.unibs.visite.persistence.FileAvailabilityRepository;
-//import it.unibs.visite.service.VolunteerService;
-//import it.unibs.visite.service.adapters.ConfigReadAdapter;
-//import it.unibs.visite.service.ConfigService;  //già in V1
-
-//import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
-//import java.time.Clock;
 import java.util.*;
 
 public final class VolunteerCLI {
     private final VolunteerController controller;
-
-
     private final Scanner in;
-    //private final ConfigService config;
     private final String nickname; // utente già autenticato
-    //private final VolunteerService service;
-
-    /*
-    public VolunteerCLI(ConfigService config, String nickname) {
-        this.config = config;
-        this.nickname = nickname;
-        this.service = new VolunteerService(
-                new ConfigReadAdapter(config),
-                new FileAvailabilityRepository(Paths.get("data", nickname + "_availabilities.ser")),
-                Clock.systemDefaultZone()
-        );
-    }
-    */
-
+    
     public VolunteerCLI(VolunteerController controller, String nickname, Scanner in) {
         this.controller = controller;
         this.nickname = nickname;
@@ -44,15 +21,15 @@ public final class VolunteerCLI {
     public void run() {
         System.out.println("=== Area VOLONTARIO ===");
         try {
-            mainMenu(nickname);
+            mainMenu();
         } finally {
             System.out.println("Logout eseguito.\n");
         }
     }
 
-    private void mainMenu(String nick) {
+    private void mainMenu() {
         while (true) {
-            System.out.printf("\n--- Menu Volontario %s ---\n", nick);
+            System.out.printf("\n--- Menu Volontario %s ---\n", nickname);
             System.out.println("1) I miei tipi di visita");
             System.out.println("2) Inserisci disponibilità per il mese entrante");
             System.out.println("3) Visualizza / revoca disponibilità (mese entrante)");
@@ -60,17 +37,17 @@ public final class VolunteerCLI {
             System.out.print("Scelta: ");
             String s = in.nextLine().trim();
             switch (s) {
-                case "1" -> mostraTipiVisita(nick);
-                case "2" -> inserisciDisponibilita(nick);
-                case "3" -> revocaDisponibilita(nick);
+                case "1" -> mostraTipiVisita();
+                case "2" -> inserisciDisponibilita();
+                case "3" -> revocaDisponibilita();
                 case "0" -> { return; }
                 default -> System.out.println("Scelta non valida.");
             }
         }
     }
 
-    private void mostraTipiVisita(String nick) {
-        List<TipoVisita> tipi = controller.visualizzaTipiVisita(nick);
+    private void mostraTipiVisita() {
+        List<TipoVisita> tipi = controller.visualizzaTipiVisita(nickname);
         if (tipi.isEmpty()) {
             System.out.println("Nessun tipo di visita associato.");
             return;
@@ -80,7 +57,7 @@ public final class VolunteerCLI {
         }
     }
 
-    private void inserisciDisponibilita(String nick) {
+    private void inserisciDisponibilita() {
         YearMonth ym = controller.meseSuccessivo();
         System.out.println("Inserisci date disponibili nel mese entrante: " + ym);
         while(in.hasNextLine()) { 
@@ -90,7 +67,7 @@ public final class VolunteerCLI {
             if (line.isEmpty()) break;
             try {
                 LocalDate date = LocalDate.parse(line);
-                controller.inserisciDisponibilita(nick, date);
+                controller.inserisciDisponibilita(nickname, date);
                 System.out.println("Disponibilità salvata.");
             } catch (DateTimeParseException ex) {
                 System.out.println("Formato non valido.");
@@ -100,11 +77,11 @@ public final class VolunteerCLI {
         }
     }
 
-    private void revocaDisponibilita(String nick) {
+    private void revocaDisponibilita() {
         YearMonth ym = controller.meseSuccessivo();
         List<LocalDate> dates = new ArrayList<>();
         try {
-            var disponibilita = controller.visualizzaDisponibilita(nick, ym);
+            var disponibilita = controller.visualizzaDisponibilita(nickname, ym);
             if (disponibilita.isEmpty()) {
                 System.out.println("Nessuna disponibilità registrata per " + ym);
                 return;
@@ -122,7 +99,7 @@ public final class VolunteerCLI {
             if (!s.isEmpty()) {
                 int idx = Integer.parseInt(s);
                 if (idx >= 1 && idx <= dates.size()) {
-                    controller.revocaDisponibilita(nick, dates.get(idx - 1));
+                    controller.revocaDisponibilita(nickname, dates.get(idx - 1));
                     System.out.println("Data rimossa.");
                 }
             }
@@ -131,6 +108,16 @@ public final class VolunteerCLI {
         }
     }
 /*
+    public VolunteerCLI(ConfigService config, String nickname) {
+        this.config = config;
+        this.nickname = nickname;
+        this.service = new VolunteerService(
+                new ConfigReadAdapter(config),
+                new FileAvailabilityRepository(Paths.get("data", nickname + "_availabilities.ser")),
+                Clock.systemDefaultZone()
+        );
+    }
+
     private void showMyVisitTypes(String nick) {
         var types = service.visitTypesOf(nick);
         if (types.isEmpty()) {

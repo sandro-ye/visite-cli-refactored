@@ -24,7 +24,7 @@ public class FruitoreService {
     private final VisitaRepository visitaRepo;
     private final TipoVisitaRepository tipoVisitaRepo;
     private final FruitoreRepository fruitoreRepo;
-    
+
     public FruitoreService() {
         this.visitaRepo = FileRepositoryPersistence.caricaOggetto(
             Paths.get("data", "visite-repo.ser"),
@@ -97,6 +97,22 @@ public class FruitoreService {
 
         visita.removeIscrizione(codiceIscrizione);
         fruitore.removeIscrizione(codiceIscrizione);
+    }
+
+    public int getMaxPersonePerIscrizione() {
+        return parametriRepo.load().getMaxPersonePerIscrizione();
+    }
+
+    public Visita getVisitaByCodiceIscrizione(String usernameFruitore,String codiceIscrizione) {
+        Fruitore fruitore = fruitoreRepo.findByUsername(usernameFruitore).orElseThrow(() ->
+            new IllegalArgumentException("Fruitore non trovato: " + usernameFruitore));
+        Iscrizione iscrizione = fruitore.getIscrizione(codiceIscrizione);
+        if(iscrizione == null) {
+            throw new IllegalArgumentException("Iscrizione non trovata per questo fruitore: " + codiceIscrizione);
+        }
+
+        return visitaRepo.find(iscrizione.getCodiceVisitaAssociato()).orElseThrow(() ->
+            new IllegalArgumentException("Visita non trovata per l'iscrizione: " + iscrizione.getCodiceVisitaAssociato()));
     }
 
     /*
