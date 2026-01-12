@@ -1,30 +1,26 @@
 package it.unibs.visite.cli;
 
-import it.unibs.visite.service.RegimeService;
-
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
-import it.unibs.visite.model.StatoVisita;
-import it.unibs.visite.model.Visita;
-//import it.unibs.visite.service.ConfigService;
+import it.unibs.visite.model.*;
+import it.unibs.visite.controller.RegimeController;
 
 public class RegimeCLI {
+    private final RegimeController regimeController;
     private final Scanner in;
-    private final RegimeService regime;
 
-    public RegimeCLI(Scanner in, RegimeService regime) {
+    public RegimeCLI(Scanner in, RegimeController regimeController) {
         this.in = in;
-        this.regime = regime;
+        this.regimeController = regimeController;
     }
 
     public void run() {
         while (true) {
-            System.out.println("\n=== MENU FUNZIONI A REGIME (V1) ===");
+            System.out.println("\n=== MENU FUNZIONI A REGIME ===");
             System.out.println("1) Aggiungi preclusione per mese i+3");
             System.out.println("2) Visualizza preclusioni mese i+3");
             System.out.println("3) Modifica max persone per iscrizione");
@@ -60,7 +56,7 @@ public class RegimeCLI {
         String ds = in.nextLine().trim();
         try {
             LocalDate d = LocalDate.parse(ds);
-            regime.addPreclusioneForMonth(target, d);
+            regimeController.aggiungiPreclusione(d);
             System.out.println("Preclusione aggiunta: " + d);
         } catch (DateTimeParseException ex) {
             System.out.println("Formato data non valido.");
@@ -69,7 +65,9 @@ public class RegimeCLI {
 
     private void cmdShowPreclusioni() {
         YearMonth target = YearMonth.now().plusMonths(3);
-        System.out.println("Preclusioni per " + target + ": " + regime.getPreclusioniFor(target));
+        System.out.println("Preclusioni per " + target + ":");
+        List<LocalDate> preclusioni = regimeController.getPreclusioniPer(target);
+        preclusioni.forEach(System.out::println);
     }
 
     private void cmdSetMax() {
@@ -77,7 +75,7 @@ public class RegimeCLI {
         String s = in.nextLine().trim();
         try {
             int v = Integer.parseInt(s);
-            regime.setMaxPersone(v);
+            regimeController.setMaxPersonePerIscrizione(v);
             System.out.println("Valore aggiornato a " + v);
         } catch (NumberFormatException e) {
             System.out.println("Valore non valido.");
@@ -85,33 +83,39 @@ public class RegimeCLI {
     }
 
     private void cmdVolontariConTipi() {
-        List<String> rows = regime.elencoVolontariConTipi();
-        if (rows.isEmpty()) System.out.println("Nessun volontario presente.");
-        rows.forEach(System.out::println);
+        for(Volontario v: regimeController.getElencoVolontari()) {
+            System.out.println("\nVolontario: " + v.getNickname());
+            List<TipoVisita> tipi = regimeController.getTipiVisitaDi(v);
+            if(tipi.isEmpty()) {
+                System.out.println("  (nessun tipo di visita associato)");
+            } else {
+                for(TipoVisita t: tipi) {
+                    System.out.println(" - " + t.getTitolo() + " (id: " + t.getId() + ")");
+                }
+            }
+        }
     }
 
     private void cmdElencoLuoghi() {
-        List<String> rows = regime.elencoLuoghi();
-        if (rows.isEmpty()) System.out.println("Nessun luogo presente.");
-        rows.forEach(System.out::println);
+        List<Luogo> luoghi = regimeController.getElencoLuoghi();
+        if (luoghi.isEmpty()) System.out.println("Nessun luogo presente.");
+        luoghi.forEach(System.out::println);
     }
 
     private void cmdTipiPerLuogo() {
         System.out.print("Inserisci id luogo: ");
         String id = in.nextLine().trim();
-        List<String> rows = regime.tipiPerLuogo(id);
-        if (rows.isEmpty()) System.out.println("Nessun tipo trovato per questo luogo.");
-        rows.forEach(System.out::println);
+        List<TipoVisita> tipi = regimeController.tipiPerLuogo(id);
+        if (tipi.isEmpty()) System.out.println("Nessun tipo trovato per questo luogo.");
+        tipi.forEach(t -> System.out.println(" - " + t.getTitolo() + " (id: " + t.getId() + ")"));
     }
 
     private void cmdVisitePerStato() {
-        Map<StatoVisita, List<Visita>> map = regime.visitePerStato();
-        for (StatoVisita s : StatoVisita.values()) {
+        for(StatoVisita s : StatoVisita.values()) {
             System.out.println("\n== " + s + " ==");
-            List<Visita> list = map.getOrDefault(s, List.of());
+            List<Visita> list = regimeController.getVisitePerStato(s);
             if (list.isEmpty()) System.out.println(" (nessuna)");
             else list.forEach(v -> System.out.println("  " + v));
         }
     }
-
 }

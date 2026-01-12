@@ -1,21 +1,131 @@
 package it.unibs.visite.service;
 
-import it.unibs.visite.core.Preconditions;
+import it.unibs.visite.core.DomainException;
 import it.unibs.visite.model.*;
+import it.unibs.visite.persistence.FileRepositoryPersistence;
+import it.unibs.visite.repository.*;
+import it.unibs.visite.repository.memory.*;
 
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.nio.file.Paths;
+
+/*
+    - vedi se separare funzionalità in altri service
+*/
 
 public class RegimeService {
-    private final ConfigService configService;
-    private final ZoneId zone = ZoneId.of("Europe/Rome");
+    private final PreclusioneRepository preclusioneRepository;
+    private final VisitaRepository visitaRepository;
+    private final VisitaRepository archivioRepository;
+    private final ParametriSistemaRepository parametriSistemaRepository;
+    private final VolontarioRepository volontarioRepository;
+    private final LuogoRepository luogoRepository;
+    private final TipoVisitaRepository tipoVisitaRepository;
 
-    public RegimeService(ConfigService configService) {
-        this.configService = configService;
+    public RegimeService() {
+        this.preclusioneRepository = FileRepositoryPersistence.caricaOggetto(
+            java.nio.file.Paths.get("data", "preclusioni.ser"),
+            InMemoryPreclusioneRepository::new);
+        this.visitaRepository = FileRepositoryPersistence.caricaOggetto(
+            java.nio.file.Paths.get("data", "visite-repo.ser"),
+            InMemoryVisitaRepository::new);
+        this.archivioRepository = FileRepositoryPersistence.caricaOggetto(
+            java.nio.file.Paths.get("data", "archivio-repo.ser"),
+            InMemoryVisitaRepository::new);
+        this.parametriSistemaRepository = FileRepositoryPersistence.caricaOggetto(
+            java.nio.file.Paths.get("data", "parametri-sistema.ser"),
+            InMemoryParametriSistemaRepository::new);
+        this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(
+            java.nio.file.Paths.get("data", "volontari.ser"),
+            InMemoryVolontarioRepository::new);
+        this.luogoRepository = FileRepositoryPersistence.caricaOggetto(
+            Paths.get("data", "luoghi-repo.ser"),
+            InMemoryLuogoRepository::new);
+        this.tipoVisitaRepository = FileRepositoryPersistence.caricaOggetto(
+            Paths.get("data", "tipi-visita-repo.ser"),
+            InMemoryTipoVisitaRepository::new);
+    }
+    
+    public void aggiungiPreclusione(LocalDate data) {
+        if(YearMonth.from(data).isBefore(YearMonth.now().plusMonths(3))) {
+            throw new IllegalArgumentException("Impossiibile aggiungere preclusione");
+        }
+
+        YearMonth now = YearMonth.from(LocalDate.now());
+        LocalDate windowStart = LocalDate.of(now.getYear(), now.getMonth(), 16);
+        LocalDate windowEnd = LocalDate.of(now.plusMonths(1).getYear(),
+            now.plusMonths(1).getMonth(),
+            15);
+        if(data.isBefore(windowStart) || data.isAfter(windowEnd)) {
+            throw new DomainException("Data fuori dalla finestra temporale consentita: dal " + windowStart + " al " + windowEnd);
+        }
+        
+        preclusioneRepository.add(data);
+        FileRepositoryPersistence.salvaOggetto(preclusioneRepository, Paths.get("data", "preclusioni.ser"));
+    }
+     
+    public List<LocalDate> getPreclusioniPer(YearMonth mese) {
+        return preclusioneRepository.getAll().stream()
+            .filter(d -> YearMonth.from(d).equals(mese))
+            .sorted()
+            .collect(Collectors.toList());
     }
 
-    public ConfigService getConfigService() { return configService; }
+    public void setMaxPersonePerIscrizione(int max) {
+        if(max < 1) {
+            throw new IllegalArgumentException("Numero massimo di persone per iscrizione deve essere >= 1");
+        }
+        ParametriSistema parametri = parametriSistemaRepository.load();
+        parametri.setMaxPersonePerIscrizione(max);
+        parametriSistemaRepository.save(parametri);
+        FileRepositoryPersistence.salvaOggetto(parametriSistemaRepository, Paths.get("data", "parametri-sistema.ser"));
+    }
+
+    public List<Volontario> getElencoVolontari() {
+        return volontarioRepository.findAll().stream()
+            .sorted(Comparator.comparing(Volontario::getNickname))
+            .collect(Collectors.toList());
+    }
+
+    public List<TipoVisita> getTipiVisitaDi(Volontario volontario) {
+        return volontario.getTipiVisitaCompetenza().stream()
+            .sorted(Comparator.comparing(TipoVisita::getTitolo))
+            .collect(Collectors.toList());
+    }
+
+    public List<Luogo> getElencoLuoghi() {
+        return luogoRepository.findAllLuoghi().stream()
+            .sorted(Comparator.comparing(Luogo::getNome))
+            .collect(Collectors.toList());
+    }
+
+    public List<TipoVisita> getTipiVisitaPerLuogo(String luogoId) {
+        Optional<Luogo> l = luogoRepository.findLuogoById(luogoId);
+        if (l.isPresent()) {
+            List<String> tipiIds = l.get().getTipiVisitaIds().stream().distinct().collect(Collectors.toList());
+            List<TipoVisita> tipi = new ArrayList<>();
+            for (String tid : tipiIds) {
+                Optional<TipoVisita> t = tipoVisitaRepository.findById(tid);
+                t.ifPresent(tipi::add);
+            }
+        }
+        return List.of();
+    }
+
+    public List<Visita> getVisitePerStato(StatoVisita stato) {
+        if(stato == StatoVisita.EFFETTUATA) {
+            return archivioRepository.findAll().stream()
+                .filter(v -> v.getStato() == stato)
+                .sorted(Comparator.comparing(Visita::getData))
+                .collect(Collectors.toList());
+        }
+        return visitaRepository.findAll().stream()
+            .filter(v -> v.getStato() == stato)
+            .sorted(Comparator.comparing(Visita::getData))
+            .collect(Collectors.toList());
+    }
 
     /**
      * Aggiunge una preclusione per una data appartenente al mese target (YearMonth).
@@ -26,6 +136,8 @@ public class RegimeService {
      *      dal giorno 16 del mese i  al giorno 15 del mese i+1 (inclusi),
      *    dove i = targetMonth.minusMonths(3)
      */
+
+    /*
     public void addPreclusioneForMonth(YearMonth targetMonth, LocalDate dateToExclude) {
         Preconditions.notNull(targetMonth, "targetMonth non può essere null");
         Preconditions.notNull(dateToExclude, "dateToExclude non può essere null");
@@ -95,4 +207,6 @@ public class RegimeService {
                         () -> new EnumMap<>(StatoVisita.class),
                         Collectors.toList()));
     }
+
+    */
 }
