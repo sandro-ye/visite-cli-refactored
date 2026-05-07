@@ -26,19 +26,19 @@ public class RegimeService {
 
     public RegimeService() {
         this.preclusioneRepository = FileRepositoryPersistence.caricaOggetto(
-            java.nio.file.Paths.get("data", "preclusioni.ser"),
+            Paths.get("data", "preclusioni.ser"),
             InMemoryPreclusioneRepository::new);
         this.visitaRepository = FileRepositoryPersistence.caricaOggetto(
-            java.nio.file.Paths.get("data", "visite-repo.ser"),
+            Paths.get("data", "visite-repo.ser"),
             InMemoryVisitaRepository::new);
         this.archivioRepository = FileRepositoryPersistence.caricaOggetto(
-            java.nio.file.Paths.get("data", "archivio-repo.ser"),
+            Paths.get("data", "archivio-repo.ser"),
             InMemoryVisitaRepository::new);
         this.parametriSistemaRepository = FileRepositoryPersistence.caricaOggetto(
-            java.nio.file.Paths.get("data", "parametri-sistema.ser"),
+            Paths.get("data", "parametri-sistema.ser"),
             InMemoryParametriSistemaRepository::new);
         this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(
-            java.nio.file.Paths.get("data", "volontari.ser"),
+            Paths.get("data", "volontari.ser"),
             InMemoryVolontarioRepository::new);
         this.luogoRepository = FileRepositoryPersistence.caricaOggetto(
             Paths.get("data", "luoghi-repo.ser"),
