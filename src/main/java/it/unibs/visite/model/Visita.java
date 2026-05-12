@@ -18,8 +18,8 @@ public class Visita implements Serializable {
     private final int numeroMassimoPartecipanti;
     private final java.util.List<Iscrizione> iscrizioni = new java.util.ArrayList<>();
 
-    public Visita(String id, String tipoVisitaId, LocalDate data, int min, int max){
-        this.id = Objects.requireNonNull(id);
+    public Visita(String tipoVisitaId, LocalDate data, int min, int max){
+        this.id = UUID.randomUUID().toString();
         this.tipoVisitaId = Objects.requireNonNull(tipoVisitaId);
         this.data = Objects.requireNonNull(data);
         this.numeroMinimoPartecipanti = min;

@@ -1,20 +1,13 @@
 package it.unibs.visite.cli;
 
-import it.unibs.visite.service.ConfigService;
-import it.unibs.visite.service.RegimeService;
-import it.unibs.visite.model.AppPhase;
+import it.unibs.visite.controller.GiornoSediciController;
 import it.unibs.visite.model.Luogo;
 import it.unibs.visite.model.TipoVisita;
-import it.unibs.visite.model.Visita;
+import it.unibs.visite.model.Volontario;
 
-import java.time.YearMonth;
-import java.util.Scanner;
-import java.util.List;
-
-/**
- * !- da sistemare siccome nella classe vi è logica di business, mentre classe dovrebbe occuparsi solo di CLI
- */
-
+import java.time.*;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 
 /**
  * CLI per la gestione delle operazioni del giorno 16.
@@ -24,7 +17,203 @@ import java.util.List;
  *  3 Riapertura raccolta disponibilità
  */
 public class GiornoSediciCLI {
+    private final GiornoSediciController controller;
+    private final Scanner in;
 
+    public GiornoSediciCLI(GiornoSediciController controller, Scanner in) {
+        this.in = in;
+        this.controller = controller;
+    }
+
+    public void run() {
+        System.out.println("\n=== MENU OPERAZIONI GIORNO 16 ===");
+        produciPianoVisite();
+        gestioneAggiunteRimozioni(); //aggiunta/rimozione volontari, luoghi, tipi visita, preclusioni
+        riapriRaccoltaDisponibilita();
+        System.out.println("\nTutte le operazioni del giorno 16 sono state completate.");
+    }
+
+    private void produciPianoVisite() {
+        YearMonth target = YearMonth.now().plusMonths(1);
+        System.out.println("Produzione piano visite per il mese i+1: " + target);
+
+        for(LocalDate data : controller.giorniNonPreclusiIn(target)) {
+            System.out.println("Data: " + data);
+            for(TipoVisita tipo : controller.visiteProgrammabiliPerData().getOrDefault(data, List.of())) {
+                System.out.println("  Tipo visita: " + tipo.getTitolo());
+                List<String> volontari = controller.volontariDisponibiliInDataPerTipo(data, tipo).stream()
+                    .map(v -> v.getNickname())
+                    .toList();
+                System.out.println("Scegli il volontario (nickname) da assegnare alla visite (invio per saltare): ");
+                for (int i = 0; i < volontari.size(); i++) {
+                    System.out.println((i + 1) + ") " + volontari.get(i));
+                }
+
+                String volontario = in.nextLine().trim();
+                if (volontario.isEmpty()) {
+                    System.out.println("Visita del " + data + " per tipo '" + tipo.getTitolo() + "' saltata.");
+                    continue;
+                }
+
+                controller.salvaAssegnazioneVolontario(volontario, tipo, data);
+            }
+        }
+
+        System.out.println("Piano visite per " + target + " prodotto con successo.");
+    }
+
+    private void gestioneAggiunteRimozioni() {
+        while(true) {
+            System.out.println("\nVuoi aggiungere/rimuovere volontari, luoghi o tipi di visita, o aggiungere preclusione? (s/n)");
+            String choice = in.nextLine().trim().toLowerCase();
+            if (choice.equals("n")) break;
+
+            System.out.println("Cosa vuoi gestire?");
+            System.out.println(" 1) Volontari");
+            System.out.println(" 2) Luoghi");
+            System.out.println(" 3) Tipi visita");
+            System.out.println(" 4) Preclusione");
+            System.out.println(" 0) Nessuna gestione, procedi alla riapertura raccolta disponibilità");
+            System.out.print("Scelta: ");
+            String entityChoice = in.nextLine().trim();
+            switch (entityChoice) {
+                case "1" -> gestioneVolontari();
+                case "2" -> gestioneLuoghi();
+                case "3" -> gestioneTipiVisita();
+                case "4" -> aggiungiPreclusione();
+                case "0" -> { return; }
+                default -> System.out.println("Scelta non valida.");
+            }
+        }
+    }
+
+    private void gestioneVolontari() {
+        String choice = in.nextLine().trim();
+        System.out.println("1) Aggiungi volontario");
+        System.out.println("2) Rimuovi volontario");
+        System.out.println("0) Nessuna gestione volontari, torna al menu precedente");
+        System.out.print("Scelta: ");
+        switch (choice) {
+            case "1" -> aggiungiVolontario();
+            case "2" -> rimuoviVolontario();
+            case "0" -> { return; }
+            default -> System.out.println("Scelta non valida.");
+        }
+    }
+
+    private void aggiungiVolontario() {
+        System.out.print("Inserisci nickname del nuovo volontario: ");
+        String nickname = in.nextLine().trim();
+        controller.aggiungiVolontario(nickname);
+        System.out.println("Volontario '" + nickname + "' aggiunto con successo.");
+    }
+
+    private void rimuoviVolontario() {
+        for(Volontario v : controller.getTuttiVolontari()) {
+            System.out.println("- " + v.getNickname());
+        }
+        System.out.print("Inserisci nickname del volontario da rimuovere: ");
+        String nickname = in.nextLine().trim();
+        controller.rimuoviVolontario(nickname);
+        System.out.println("Volontario '" + nickname + "' rimosso con successo.");
+    }
+
+    private void gestioneLuoghi() {
+        // simile a gestioneVolontari, con opzioni per aggiungere/rimuovere luoghi
+        String choice = in.nextLine().trim();
+        System.out.println("1) Aggiungi luogo");
+        System.out.println("2) Rimuovi luogo");
+        System.out.println("0) Nessuna gestione luoghi, torna al menu precedente");
+        System.out.print("Scelta: ");
+        switch (choice) {
+            case "1" -> aggiungiLuogo();
+            case "2" -> rimuoviLuogo();
+            case "0" -> { return; }
+            default -> System.out.println("Scelta non valida.");
+        }
+    }
+
+    private void aggiungiLuogo() {
+        System.out.print("Inserisci nome del nuovo luogo: ");
+        String nome = in.nextLine().trim();
+        System.out.println("Inserisci descrizione del luogo (opzionale, invio per saltare): ");
+        String descrizione = in.nextLine().trim();
+        controller.aggiungiLuogo(nome, descrizione.isEmpty() ? null : descrizione);
+        System.out.println("Luogo '" + nome + "' aggiunto con successo.");
+    }
+
+    private void rimuoviLuogo() {
+        for(Luogo l : controller.getTuttiLuoghi()) {
+            System.out.println("- " + l.getNome());
+        }
+        System.out.print("Inserisci nome del luogo da rimuovere: ");
+        String nome = in.nextLine().trim();
+        controller.rimuoviLuogo(nome);
+        System.out.println("Luogo '" + nome + "' rimosso con successo.");
+    }
+
+    private void gestioneTipiVisita() {
+        // simile a gestioneVolontari, con opzioni per aggiungere/rimuovere tipi di visita
+        String choice = in.nextLine().trim();
+        System.out.println("1) Aggiungi tipo di visita");
+        System.out.println("2) Rimuovi tipo di visita");
+        System.out.println("0) Nessuna gestione tipi di visita, torna al menu precedente");
+        System.out.print("Scelta: ");
+        switch (choice) {
+            case "1" -> aggiungiTipoVisita();
+            case "2" -> rimuoviTipoVisita();
+            case "0" -> { return; }
+            default -> System.out.println("Scelta non valida.");
+        }
+    }
+
+    private void aggiungiTipoVisita() {
+        for(Luogo l : controller.getTuttiLuoghi()) {
+            System.out.println("- " + l.getNome());
+        }
+        System.out.println("Inserisci nome del luogo associato (deve esistere): ");
+        String luogo = in.nextLine().trim();
+        System.out.println("Inserisci titolo del nuovo tipo di visita: ");
+        String titolo = in.nextLine().trim();
+        System.out.println("Inserisci descrizione del tipo di visita (opzionale, invio per saltare): ");
+        String descrizione = in.nextLine().trim();
+        controller.aggiungiTipoVisita(luogo, titolo, descrizione.isEmpty() ? null : descrizione);
+        System.out.println("Tipo di visita '" + titolo + "' aggiunto con successo.");
+    }
+
+    private void rimuoviTipoVisita() {
+        for(TipoVisita t : controller.getTuttiTipiVisita()) {
+            System.out.println("- " + t.getTitolo());
+        }
+        System.out.print("Inserisci titolo del tipo di visita da rimuovere: ");
+        String titolo = in.nextLine().trim();
+        controller.rimuoviTipoVisita(titolo);
+        System.out.println("Tipo di visita '" + titolo + "' rimosso con successo.");
+    }
+
+    private void aggiungiPreclusione() {
+        YearMonth target = YearMonth.now().plusMonths(3);
+        System.out.println("Imposteremo una preclusione per il mese i+3: " + target);
+        System.out.print("Inserisci data da escludere (YYYY-MM-DD): ");
+        String ds = in.nextLine().trim();
+        try {
+            LocalDate d = LocalDate.parse(ds);
+            controller.aggiungiPreclusione(d);
+            System.out.println("Preclusione aggiunta: " + d);
+        } catch (DateTimeParseException ex) {
+            System.out.println("Formato data non valido.");
+        }
+    }
+
+    private void riapriRaccoltaDisponibilita() {
+        System.out.println("Riapertura della raccolta delle disponibilità per " + LocalDate.now().getMonth().plus(2) + "...");
+        controller.riapriRaccoltaDisponibilita();
+        System.out.println("Raccolta disponibilità per " + LocalDate.now().getMonth().plus(2) + " riaperta con successo.");
+    }
+
+}
+
+    /*
     private final ConfigService configService;
     private final Scanner scanner = new Scanner(System.in);
 
@@ -105,3 +294,4 @@ public class GiornoSediciCLI {
     }
 
 }
+    */

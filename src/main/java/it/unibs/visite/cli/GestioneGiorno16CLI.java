@@ -7,6 +7,11 @@ import it.unibs.visite.service.ConfigService;
 import java.util.*;
 
 /**
+ * inutile
+ */
+
+
+/**
  * CLI dedicata alle operazioni di aggiunta e rimozione
  * consentite esclusivamente il giorno 16 di ogni mese.
  * Richiamata da GiornoSediciCLI durante la fase 2.

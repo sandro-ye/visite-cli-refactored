@@ -19,6 +19,13 @@ public class InMemoryTipoVisitaRepository implements TipoVisitaRepository, Seria
     }
 
     @Override
+    public Optional<TipoVisita> findByTitolo(String titolo) {
+        return storage.values().stream()
+            .filter(t -> t.getTitolo().equalsIgnoreCase(titolo))
+            .findFirst();
+    }
+
+    @Override
     public Collection<TipoVisita> findAll() {
         return Collections.unmodifiableCollection(storage.values());
     }

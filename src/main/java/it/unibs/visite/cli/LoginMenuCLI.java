@@ -7,6 +7,10 @@ import it.unibs.visite.security.AuthService;
 import it.unibs.visite.service.ConfigService;
 import it.unibs.visite.service.RegistrationService;
 
+/**
+ * inutile
+ */
+
 public class LoginMenuCLI {
     private final Scanner in;
     private final AuthService auth;

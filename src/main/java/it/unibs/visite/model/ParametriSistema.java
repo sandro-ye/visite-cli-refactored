@@ -7,10 +7,14 @@ public class ParametriSistema implements Serializable {
     private String ambitoTerritoriale;   // impostabile una sola volta
     private int maxPersonePerIscrizione; // modificabile
     private boolean initialized;         // true dopo wizard una tantum
+    private AppPhase appPhase;
 
     public String getAmbitoTerritoriale() { return ambitoTerritoriale; }
     public int getMaxPersonePerIscrizione() { return maxPersonePerIscrizione; }
     public boolean isInitialized() { return initialized; }
+    public AppPhase getAppPhase() { return appPhase; }
+
+    public void setAppPhase(AppPhase appPhase) { this.appPhase = appPhase; }
 
     public void setAmbitoTerritorialeUnaTantum(String ambito) {
         if (this.ambitoTerritoriale != null) throw new IllegalStateException("Ambito già impostato");

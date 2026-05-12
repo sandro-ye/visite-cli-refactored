@@ -19,6 +19,13 @@ public class InMemoryLuogoRepository implements LuogoRepository, Serializable {
     }
 
     @Override
+    public Optional<Luogo> findByNome(String nome) {
+        return storage.values().stream()
+            .filter(l -> l.getNome().equalsIgnoreCase(nome))
+            .findFirst();
+    }
+
+    @Override
     public Collection<Luogo> findAllLuoghi() {
         return Collections.unmodifiableCollection(storage.values());
     }
