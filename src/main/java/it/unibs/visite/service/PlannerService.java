@@ -14,7 +14,6 @@ import it.unibs.visite.model.AppPhase;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.repository.memory.*;
-import it.unibs.visite.service.DisponibilitaService;
 
 /**
 * Genera il piano mensile di visite proponibili in base alle disponibilità.

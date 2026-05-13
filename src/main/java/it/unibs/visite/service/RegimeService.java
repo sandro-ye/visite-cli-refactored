@@ -11,10 +11,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.nio.file.Paths;
 
-/*
-    - vedi se separare funzionalità in altri service
-*/
-
 public class RegimeService {
     private final PreclusioneRepository preclusioneRepository;
     private final VisitaRepository visitaRepository;

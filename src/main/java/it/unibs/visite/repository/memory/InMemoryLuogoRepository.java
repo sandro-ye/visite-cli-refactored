@@ -6,7 +6,15 @@ import it.unibs.visite.repository.LuogoRepository;
 import it.unibs.visite.model.Luogo;
 
 public class InMemoryLuogoRepository implements LuogoRepository, Serializable {
-    private final Map<String, Luogo> storage = new HashMap<>();
+    private final Map<String, Luogo> storage;
+
+    public InMemoryLuogoRepository() {
+        this.storage = new HashMap<>();
+    }
+
+    public InMemoryLuogoRepository(Map<String, Luogo> initialData) {
+        this.storage = new HashMap<>(initialData);
+    }
 
     @Override
     public void save(Luogo luogo) {

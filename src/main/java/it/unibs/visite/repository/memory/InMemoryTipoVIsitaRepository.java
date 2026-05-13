@@ -6,8 +6,16 @@ import java.util.*;
 import java.io.Serializable;
 
 public class InMemoryTipoVisitaRepository implements TipoVisitaRepository, Serializable {
-    private final Map<String, TipoVisita> storage = new HashMap<>();
+    private final Map<String, TipoVisita> storage;
     
+    public InMemoryTipoVisitaRepository() {
+        this.storage = new HashMap<>();
+    }
+
+    public InMemoryTipoVisitaRepository(HashMap<String, TipoVisita> initialData) {
+        this.storage = new HashMap<>(initialData);
+    }
+
     @Override
     public void save(TipoVisita tipoVisita) {
         storage.put(tipoVisita.getId(), tipoVisita);

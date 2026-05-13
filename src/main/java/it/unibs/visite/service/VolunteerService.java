@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+// inutile(?)
+
 public final class VolunteerService {
 
     private final ConfigReadPort config;                // adapter su ConfigService

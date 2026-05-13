@@ -10,6 +10,8 @@ import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.ParametriSistemaRepository;
 import it.unibs.visite.repository.memory.InMemoryParametriSistemaRepository;
 
+//completare
+
 public class InitWizardService{
     private final ConfigService config;
     private final ParametriSistemaRepository parametriSistemaRepository;

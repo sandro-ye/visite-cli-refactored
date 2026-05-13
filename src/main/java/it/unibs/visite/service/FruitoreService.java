@@ -68,6 +68,9 @@ public class FruitoreService {
 
         Iscrizione iscrizione = visita.aggiungiIscrizione(fruitore, numeroPersone);
         fruitore.addIscrizione(iscrizione);
+        fruitoreRepo.save(fruitore);
+
+        saveAll();
     }
 
     public List<Iscrizione> getIscrizioniDi(String usernameFruitore) {
@@ -96,7 +99,11 @@ public class FruitoreService {
         }
 
         visita.removeIscrizione(codiceIscrizione);
+        visitaRepo.save(visita);
         fruitore.removeIscrizione(codiceIscrizione);
+        fruitoreRepo.save(fruitore);
+
+        saveAll();
     }
 
     public int getMaxPersonePerIscrizione() {
@@ -113,6 +120,13 @@ public class FruitoreService {
 
         return visitaRepo.find(iscrizione.getCodiceVisitaAssociato()).orElseThrow(() ->
             new IllegalArgumentException("Visita non trovata per l'iscrizione: " + iscrizione.getCodiceVisitaAssociato()));
+    }
+
+    private void saveAll() {
+        FileRepositoryPersistence.salvaOggetto(visitaRepo, Paths.get("data", "visite-repo.ser"));
+        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepo, Paths.get("data", "tipi-visita-repo.ser"));
+        FileRepositoryPersistence.salvaOggetto(parametriRepo, Paths.get("data", "parametri-sistema.ser"));
+        FileRepositoryPersistence.salvaOggetto(fruitoreRepo, Paths.get("data", "fruitori.ser"));
     }
 
     /*

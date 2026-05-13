@@ -6,6 +6,8 @@ import it.unibs.visite.model.Fruitore;
 import it.unibs.visite.persistence.FilePersistence;
 import it.unibs.visite.security.AuthService;
 
+// eliminabile (?)
+
 /**
  * Coordina la registrazione dei fruitori tra dominio (DataStore) e credenziali (AuthService).
  * Non duplica logica di hashing/ruoli: delega ad AuthService.

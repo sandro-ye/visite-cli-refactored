@@ -4,6 +4,8 @@ import it.unibs.visite.model.*;
 import java.time.*;
 import java.util.*;
 
+// da sistemare
+
 public class VisitBatchService {
     private final ConfigService config;
     public VisitBatchService(ConfigService config){ this.config = config; }

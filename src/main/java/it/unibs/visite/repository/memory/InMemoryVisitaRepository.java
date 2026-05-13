@@ -6,7 +6,15 @@ import it.unibs.visite.model.Visita;
 import it.unibs.visite.repository.VisitaRepository;
 
 public class InMemoryVisitaRepository implements VisitaRepository, Serializable {
-    private final Map<String, Visita> storage = new HashMap<>();
+    private final Map<String, Visita> storage;
+
+    public InMemoryVisitaRepository() {
+        this.storage = new HashMap<>();
+    }
+
+    public InMemoryVisitaRepository(HashMap<String, Visita> initialData) {
+        this.storage = new HashMap<>(initialData);
+    }
     
     @Override
     public void save(Visita visita) {

@@ -1,7 +1,5 @@
 package it.unibs.visite.core;
 
-import java.util.Objects;
-
 /**
  * Classe di utilità per verificare precondizioni, postcondizioni e invarianti.
  * Se una condizione non è rispettata, lancia una DomainException con messaggio descrittivo.

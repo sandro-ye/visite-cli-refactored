@@ -9,6 +9,14 @@ import it.unibs.visite.model.ParametriSistema;
 public class InMemoryParametriSistemaRepository implements ParametriSistemaRepository, Serializable{
     private ParametriSistema parametri;
 
+    public InMemoryParametriSistemaRepository() {
+        this.parametri = new ParametriSistema();
+    }
+
+    public InMemoryParametriSistemaRepository(ParametriSistema parametri) {
+        this.parametri = parametri;
+    }
+
     @Override
     public ParametriSistema load() {
         return parametri;

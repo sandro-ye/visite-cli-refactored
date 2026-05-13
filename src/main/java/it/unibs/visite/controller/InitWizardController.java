@@ -2,6 +2,8 @@ package it.unibs.visite.controller;
 
 import it.unibs.visite.service.InitWizardService;
 
+//completare
+
 public class InitWizardController {
     private final InitWizardService service;
 

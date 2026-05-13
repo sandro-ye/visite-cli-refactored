@@ -6,7 +6,15 @@ import it.unibs.visite.model.Fruitore;
 import java.util.*;
 
 public class InMemoryFruitoreRepository implements FruitoreRepository, Serializable {
-    private final Map<String, Fruitore> storage = new HashMap<>();
+    private final Map<String, Fruitore> storage;
+
+    public InMemoryFruitoreRepository() {
+        this.storage = new HashMap<>();
+    }
+
+    public InMemoryFruitoreRepository(Map<String, Fruitore> initialData) {
+        this.storage = new HashMap<>(initialData);
+    }
 
     @Override
     public void save(Fruitore fruitore) {

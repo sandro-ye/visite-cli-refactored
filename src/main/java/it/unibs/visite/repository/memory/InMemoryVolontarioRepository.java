@@ -6,7 +6,15 @@ import it.unibs.visite.model.Volontario;
 import it.unibs.visite.repository.VolontarioRepository;
 
 public class InMemoryVolontarioRepository implements VolontarioRepository, Serializable {
-    private final Map<String, Volontario> storage = new HashMap<>();
+    private final Map<String, Volontario> storage;
+
+    public InMemoryVolontarioRepository() {
+        this.storage = new HashMap<>();
+    }
+
+    public InMemoryVolontarioRepository(HashMap<String, Volontario> volontari) {
+        this.storage = new HashMap<>(volontari);
+    }
     
     @Override
     public void save(Volontario volontario) {

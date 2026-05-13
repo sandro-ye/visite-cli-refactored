@@ -1,14 +1,10 @@
 package it.unibs.visite.service;
 
 import it.unibs.visite.core.DomainException;
-import it.unibs.visite.model.DisponibilitaVolontario;
-import it.unibs.visite.model.TipoVisita;
-import it.unibs.visite.model.Volontario;
+import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
-import it.unibs.visite.repository.PreclusioneRepository;
-import it.unibs.visite.repository.VolontarioRepository;
-import it.unibs.visite.repository.memory.InMemoryPreclusioneRepository;
-import it.unibs.visite.repository.memory.InMemoryVolontarioRepository;
+import it.unibs.visite.repository.*;
+import it.unibs.visite.repository.memory.*;
 
 import java.nio.file.Paths;
 import java.time.*;

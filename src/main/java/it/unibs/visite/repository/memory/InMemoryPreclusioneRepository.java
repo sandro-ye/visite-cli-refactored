@@ -9,7 +9,15 @@ import java.util.stream.Collectors;
 import it.unibs.visite.repository.PreclusioneRepository;
 
 public class InMemoryPreclusioneRepository implements PreclusioneRepository, Serializable {
-    private final Set<LocalDate> preclusioni = new HashSet<>();
+    private final Set<LocalDate> preclusioni;
+
+    public InMemoryPreclusioneRepository() {
+        this.preclusioni = new HashSet<>();
+    }
+
+    public InMemoryPreclusioneRepository(Set<LocalDate> initialPreclusioni) {
+        this.preclusioni = new HashSet<>(initialPreclusioni);
+    }
 
     @Override
     public void add(LocalDate data) {
