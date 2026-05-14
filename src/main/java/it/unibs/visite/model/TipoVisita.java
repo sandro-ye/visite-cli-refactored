@@ -6,6 +6,8 @@ import java.time.LocalTime;
 import java.util.*;
 import it.unibs.visite.core.Preconditions;
 
+//modificare
+
 public class TipoVisita implements Serializable {
     private final String id;
     private final String luogoId;
@@ -70,10 +72,8 @@ public class TipoVisita implements Serializable {
     public void setNumeroMassimoPartecipanti(int num) { this.numeroMassimoPartecipanti = num; }
 
 
-    public void addVolontario(String nickname, DataStore ds) {
+    public void addVolontario(String nickname) {
         Preconditions.notBlank(nickname, "nickname volontario obbligatorio");
-        Preconditions.notNull(ds, "DataStore non puo essere null");
-        Preconditions.check(ds.volontarioEsiste(nickname), "Volontario specificato non esiste");
 
         volontariNicknames.add(nickname);
 

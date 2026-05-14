@@ -1,12 +1,180 @@
 package it.unibs.visite.cli;
 
-import it.unibs.visite.model.*;
-import it.unibs.visite.service.ConfigService;
-import it.unibs.visite.service.InitWizardService;
-
-import java.util.*;
+import java.util.Scanner;
+import it.unibs.visite.controller.InitWizardController;
 
 public class InitWizardCLI {
+    private final InitWizardController controller;
+    private final Scanner in;
+
+    public InitWizardCLI(InitWizardController controller, Scanner in) {
+        this.controller = controller;
+        this.in = in;
+    }
+
+    public void run() {
+        System.out.println("=== WIZARD INIZIALIZZAZIONE ===");
+
+        if(controller.isInitialized()) {
+            System.out.println("Il sistema risulta già inizializzato.");
+            return;
+        } else {
+            impostaParametriSistema();
+        }
+
+        creaLuoghiConVisiteEVolontari();
+
+        if (leggiStringa("\nVuoi aggiungere nuovi tipi di visita a luoghi esistenti? (s/n): ").equalsIgnoreCase("s")) {
+            aggiungiTipiVisitaALuoghiEsistenti();
+        }
+
+        if (leggiStringa("\nVuoi aggiungere nuovi volontari o associarli a tipi di visita esistenti? (s/n): ").equalsIgnoreCase("s")) {
+            aggiungiVolontariATipiEsistenti();
+        }
+
+        verificaInvariants();
+        System.out.println("\nWizard completato. Sistema inizializzato.");
+    }
+
+    private void impostaParametriSistema() {
+        System.out.println("\n=== Impostazione dei parametri di sistema ===");
+
+        String ambito = leggiStringa("Abmito territoriale (es: 'Provincia di Parma'): ");
+        while(ambito == null || ambito.isEmpty()) {
+            System.out.println("L'ambito territoriale è obbligatorio");
+            ambito = leggiStringa(">");
+        }
+
+        int maxPersonePerIscrizione = leggiIntero("Numero massimo di persone per iscrizione: ");
+            while (maxPersonePerIscrizione <= 0) {
+                System.out.println("Il numero deve essere positivo.");
+                maxPersonePerIscrizione = leggiIntero("Numero massimo di persone per iscrizione: ");
+            }
+        
+
+        controller.avvia(ambito, maxPersonePerIscrizione);
+        System.out.println("\nParametri impostati correttamente.\n");
+    }
+
+    private void creaLuoghiConVisiteEVolontari() {
+        System.out.println("=== Creazione dei luoghi ===");
+        System.out.println("È necessario creare almeno un luogo per poter proseguire.");
+
+        while (true) {
+            String risposta = leggiStringa("Vuoi creare un nuovo luogo? (s/n): ");
+            if (risposta.isEmpty()) risposta = "n";
+            if (risposta.equalsIgnoreCase("n")) {
+                if (!controller.hasLuoghi()) {
+                    System.out.println("Devi creare almeno un luogo prima di continuare");
+                    continue;
+                } else return;
+            }
+
+            String nome = leggiStringa("Nome del luogo: ");
+            String descrizione = leggiStringa("Descrizione (facoltativa): ");
+
+            controller.addLuogo(nome, descrizione);
+            System.out.println("Luogo creato: " + nome);
+
+            creaTipiVisitaPerLuogo(nome);
+        }
+    }
+
+    private void creaTipiVisitaPerLuogo(String nomeLuogo) {
+        System.out.println("\n=== Creazione tipi di visita per il luogo '" + nomeLuogo + "' ===");
+        System.out.println("Ogni luogo deve avere almeno un tipo di visita associato");
+
+        while(true) {
+            String risposta = leggiStringa("Vuoi aggiungere un tipo di visita a questo luogo? (s/n): ");
+            if (risposta.isBlank()) risposta = "n";
+            if (risposta.equalsIgnoreCase("n")) {
+                if (!controller.hasTipiVisita()) {
+                    System.out.println("Ogni luogo deve avere almeno un tipo di visita per luogo");
+                    continue;
+                } else return;
+            }
+
+            String titolo = leggiStringa("Titolo: ");
+            String descrizione = leggiStringa("Descrizione: ");
+
+            controller.aggiungiTipoVisitaALuogo(nomeLuogo, titolo, descrizione);
+            System.out.println("Tipo di visita '" + titolo + "' creato per il luogo '" + nomeLuogo + "'.");
+
+            creaVolontariPerTipoVisita(titolo);
+        }
+    }
+
+    private void creaVolontariPerTipoVisita(String nomeTipoVisita) {
+        System.out.println("\n=== Assegna volontari al tipo di visita '" + nomeTipoVisita + "' ===");
+
+        while (true) {
+            System.out.println("Volontari esistenti: ");
+            controller.getAllVolontariNicknames().forEach(n -> System.out.println(" - " + n));
+            String nickname = leggiStringa("Inserisci nickname volontario (nuovo o esistente, vuoto per terminare): ");
+            if (nickname.isEmpty()) {
+                if (!controller.hasVolontari()) {
+                    System.out.println("Devi associare almeno un volontario");
+                    continue;
+                } else break;
+            }
+
+            controller.aggiungiVolontarioATipoVisita(nickname, nomeTipoVisita);
+            System.out.println("Volontario '" + nickname + "' associato al tipo '" + nomeTipoVisita + "'.");
+        }
+    }
+
+    private void aggiungiTipiVisitaALuoghiEsistenti() {
+        System.out.println("\n=== Aggiunta tipi di visita a luoghi esistenti ===");
+        controller.getAllLuoghiNames().forEach(name -> System.out.println(" - " + name));
+        String nomeLuogo = leggiStringa("Inserisci il nome del luogo a cui vuoi aggiungere un tipo di visita (vuoto per terminare): ");
+        while(!nomeLuogo.isEmpty()) {
+            String titolo = leggiStringa("Titolo: ");
+            String descrizione = leggiStringa("Descrizione: ");
+            controller.aggiungiTipoVisitaALuogo(nomeLuogo, titolo, descrizione);
+            System.out.println("Tipo di visita '" + titolo + "' creato per il luogo '" + nomeLuogo + "'.");
+        }
+    }
+
+    private void aggiungiVolontariATipiEsistenti() {
+        System.out.println("\n=== Aggiunta volontari a tipi di visita esistenti ===");
+        controller.getAllTipiVisitaNames().forEach(name -> System.out.println(" - " + name));
+        String nomeTipoVisita = leggiStringa("Inserisci il nome del tipo di visita a cui vuoi aggiungere un volontario (vuoto per terminare): ");
+        while(!nomeTipoVisita.isEmpty()) {
+            String nickname = leggiStringa("Inserisci il nickname del volontario (vuoto per terminare): ");
+            if (nickname.isEmpty()) {
+                break;
+            }
+            controller.aggiungiVolontarioATipoVisita(nickname, nomeTipoVisita);
+            System.out.println("Volontario '" + nickname + "' associato al tipo '" + nomeTipoVisita + "'.");
+        }
+    }
+
+    private void verificaInvariants() {
+        try {
+            controller.validateInvariants();
+        } catch (Exception e) {
+            System.out.println("Errore di validazione: " + e.getMessage());
+            System.out.println("Correggere i dati (ad es. associare almeno un volontario per ogni tipo di visita).");
+        }
+    }
+
+    private String leggiStringa(String msg) {
+        System.out.print(msg);
+        return in.nextLine().trim();
+    }
+
+    private int leggiIntero(String msg) {
+        System.out.print(msg);
+        while(!in.hasNextInt()) {
+            in.nextLine();
+            System.out.println("Input non valido. Riprova.");
+        }
+        int value = in.nextInt();
+        in.nextLine();
+        return value;
+    }
+
+    /*
     private final Scanner scanner;
     private final InitWizardService wizard;
 
@@ -224,4 +392,6 @@ public class InitWizardCLI {
             System.out.println("Correggere i dati (ad es. associare almeno un volontario per ogni tipo di visita).");
         }
     }
+
+    */
 }
