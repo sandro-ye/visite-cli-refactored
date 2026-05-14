@@ -12,12 +12,6 @@ import java.util.Map;
  * - rimozione credenziali utente
  */
 
-
-/*
-sistema metodo rimuovi credenziali utente per single responsibility principle (si sta occupando anche di interazione 
-con utente, che non dovrebbe fare)
-*/
-
 public class CredentialsStore implements Serializable {
     public static class Entry implements Serializable {
         public String username;
@@ -61,16 +55,9 @@ public class CredentialsStore implements Serializable {
 
     //Per rimuovere delle credenziali:
     public void rimuoviCredenziali(String username) {
-        if (username == null || username.isBlank()) {
+        if (username == null || username.isBlank() || !users.containsKey(username)) {
             throw new IllegalArgumentException("Username non valido per la rimozione delle credenziali");
         }
-
-        if (!users.containsKey(username)) {
-            System.out.println("Nessun utente con username '" + username + "' trovato, nessuna rimozione eseguita.");
-            return;
-        }
-
         users.remove(username);
-        System.out.println("Credenziali dell'utente '" + username + "' rimosse con successo.");
     }
 }

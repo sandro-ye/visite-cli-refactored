@@ -18,10 +18,7 @@ import it.unibs.visite.model.LoginResult;
 public class AuthService {
     private final FilePersistence fp;
     private CredentialsStore creds;
-
-    private static final String pswrdDefaultVolontario = "volontario";
-    public String getPswrdDefaultVolontario() { return pswrdDefaultVolontario; }
-
+    
     public AuthService(FilePersistence fp) {
         this.fp = fp;
 
@@ -65,14 +62,24 @@ public class AuthService {
 
     // crea un nuovo configuratore (amministratore)
     public void createConfigurator(String username, char[] password) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username non valido per la creazione del configuratore");
+        }
+        if (creds.getUsers().containsKey(username)) {
+            throw new IllegalArgumentException("Username già esistente: " + username);
+        }
         creds.putNewUser(username, password, false, "ADMIN");
         fp.saveCredentials(creds);
     }
 
     // === NUOVO: crea un volontario ===
     public void createVolunteer(String username, char[] password) {
-        // volontario NON è obbligato al cambio password al primo accesso? dipende da regole.
-        // se vuoi forzarlo al primo accesso: metti true al posto di false
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username non valido per la creazione del volontario");
+        }
+        if (creds.getUsers().containsKey(username)) {
+            throw new IllegalArgumentException("Username già esistente: " + username);
+        }
         creds.putNewUser(username, password, true, "VOLUNTEER");
         fp.saveCredentials(creds);
     }
@@ -89,15 +96,18 @@ public class AuthService {
         return e != null && "VOLUNTEER".equalsIgnoreCase(e.role);
     }
 
-    public void rimuoviCredenziali(String nickname) {
-        if (nickname == null || nickname.isBlank()) {
-            throw new IllegalArgumentException("Nickname non valido per la rimozione delle credenziali");
-        }
-        creds.rimuoviCredenziali(nickname);
+    public void rimuoviCredenziali(String username) {
+        creds.rimuoviCredenziali(username);
     }
 
     // === versione 4 ===
     public void createFruitore(String username, char[] password) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username non valido per la creazione del fruitore");
+        }
+        if (creds.getUsers().containsKey(username)) {
+            throw new IllegalArgumentException("Username già esistente: " + username);
+        }
         creds.putNewUser(username, password, false, "FRUITORE");
         fp.saveCredentials(creds);
     }
