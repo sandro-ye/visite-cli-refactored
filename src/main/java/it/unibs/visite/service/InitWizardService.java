@@ -9,6 +9,7 @@ import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.repository.memory.*;
+import it.unibs.visite.security.AuthService;
 
 // vedere se togliere validateInvariants o se spostarla in un'altra classe
 
@@ -120,6 +121,9 @@ public class InitWizardService{
         v.orElseGet(() -> {
             Volontario newVolontario = new Volontario(nickname);
             volontarioRepository.save(newVolontario);
+            FileRepositoryPersistence.salvaOggetto(volontarioRepository, 
+                Paths.get("data", "volontario-repository.ser"));
+            new AuthService().createVolunteer(nickname);
             return newVolontario;
         });
         tipoVisitaRepository.save(t);

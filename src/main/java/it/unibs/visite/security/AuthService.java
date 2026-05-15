@@ -1,6 +1,7 @@
 package it.unibs.visite.security;
 
 import it.unibs.visite.persistence.FilePersistence;
+import it.unibs.visite.service.FruitoreService;
 import it.unibs.visite.model.LoginResult;
 import java.nio.file.Path;
 
@@ -19,6 +20,7 @@ import java.nio.file.Path;
 public class AuthService {
     private final FilePersistence fp;
     private CredentialsStore creds;
+    private static final String DEFAULT_VOLUNTEER_PASSWORD = "volontario";
     
     public AuthService() {
         this.fp = new FilePersistence(Path.of("data"));
@@ -74,14 +76,14 @@ public class AuthService {
     }
 
     // === NUOVO: crea un volontario ===
-    public void createVolunteer(String username, char[] password) {
+    public void createVolunteer(String username) {
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Username non valido per la creazione del volontario");
         }
         if (creds.getUsers().containsKey(username)) {
             throw new IllegalArgumentException("Username già esistente: " + username);
         }
-        creds.putNewUser(username, password, true, "VOLUNTEER");
+        creds.putNewUser(username, DEFAULT_VOLUNTEER_PASSWORD.toCharArray(), true, "VOLUNTEER");
         fp.saveCredentials(creds);
     }
 
@@ -111,11 +113,17 @@ public class AuthService {
         }
         creds.putNewUser(username, password, false, "FRUITORE");
         fp.saveCredentials(creds);
+        new FruitoreService().registraFruitore(username);
     }
 
     // === NUOVO: controlla ruolo fruitore ===
     public boolean isFruitore(String username) {
         CredentialsStore.Entry e = creds.getUsers().get(username);
         return e != null && "FRUITORE".equalsIgnoreCase(e.role);
+    }
+
+    public String getUserRole(String username) {
+        CredentialsStore.Entry e = creds.getUsers().get(username);
+        return e != null ? e.role : null;
     }
 }

@@ -122,6 +122,15 @@ public class FruitoreService {
             new IllegalArgumentException("Visita non trovata per l'iscrizione: " + iscrizione.getCodiceVisitaAssociato()));
     }
 
+    public void registraFruitore(String username) {
+        if (fruitoreRepo.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Fruitore già esistente: " + username);
+        }
+        Fruitore f = new Fruitore(username);
+        fruitoreRepo.save(f);
+        saveAll();
+    }
+
     private void saveAll() {
         FileRepositoryPersistence.salvaOggetto(visitaRepo, Paths.get("data", "visite-repo.ser"));
         FileRepositoryPersistence.salvaOggetto(tipoVisitaRepo, Paths.get("data", "tipi-visita-repo.ser"));

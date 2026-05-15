@@ -14,7 +14,7 @@ public class LoginCLI {
         this.loginController = loginController;
     }
 
-    public void run() {
+    public String run() {
         System.out.println("=== ACCESSO VISITE GUIDATE ===");
         stampaMenu();
         int choice = leggiIntero(">");
@@ -25,6 +25,7 @@ public class LoginCLI {
                 String username = leggiStringa("Username: ");
                 String password = leggiStringa("Password: ");
                 loginController.registerUser(username, password.toCharArray());
+                return username;
             }
             case 2 -> {
                 System.out.println("\n=== LOGIN ===");
@@ -32,14 +33,27 @@ public class LoginCLI {
                 String password = leggiStringa("Password: ");
                 LoginResult success = loginController.login(username, password.toCharArray());
                 switch (success) {
-                    case FIRST_ACCESS -> changePassword(username);
-                    case SUCCESS -> System.out.println("Login effettuato con successo.");
-                    case FAILURE -> System.out.println("Login fallito. Credenziali errate.");
+                    case FIRST_ACCESS -> { 
+                        changePassword(username);
+                        return username; 
+                    }
+                    case SUCCESS -> {
+                        System.out.println("Login effettuato con successo.");
+                        return username;
+                    }
+                    case FAILURE -> {
+                        System.out.println("Login fallito. Credenziali errate.");
+                        return run(); // riprova login
+                    }
                 }
             }
             case 0 -> {
                 System.out.println("Uscita in corso...");
-                return; 
+                return null; 
+            }
+            default -> {
+                System.out.println("Scelta non valida. Riprova.");
+                return run(); // riprova menu
             }
         }
     }

@@ -18,8 +18,8 @@ public class FruitoreCLI {
     private final Scanner in;
     private final FruitoreController controller;
 
-    public FruitoreCLI(FruitoreController controller, String username, Scanner in) {
-        this.controller = controller;
+    public FruitoreCLI(String username, Scanner in) {
+        this.controller = new FruitoreController();
         this.username = username;
         this.in = in;
     }

@@ -1,19 +1,13 @@
 package it.unibs.visite.cli;
 
-import it.unibs.visite.persistence.FilePersistence;
-import it.unibs.visite.security.AuthService;
-import it.unibs.visite.service.ConfigService;
-import it.unibs.visite.service.RegimeService;
-
-import java.nio.file.Paths;
 import java.util.Scanner;
+import it.unibs.visite.controller.LoginController;
+import it.unibs.visite.security.AuthService;
 /*
     - modifica login con LoginCLI
     - modifica wiring di VolunteerCLI
-
-
-
 */
+
 /**
  * classe principale per avvio CLI dell'applicazione 
  * - violazione single responsibility principle 
@@ -24,6 +18,33 @@ import java.util.Scanner;
  */
 
 public class MainCLI {
+    private final Scanner in;
+    private final AuthService auth;
+
+    public MainCLI(AuthService auth) {
+        this.in = new Scanner(System.in);
+        this.auth = auth;
+    }
+
+    public void run() {
+        System.out.println("--------------------");
+        System.out.println("|    VISITE CLI    |");
+        System.out.println("--------------------");
+
+        LoginCLI loginCLI = new LoginCLI(new LoginController(), in);
+        String username = loginCLI.run();
+
+        switch (auth.getUserRole(username)) {
+            case "FRUITORE" -> new FruitoreCLI(username, in).run();
+            case "VOLONTARIO" -> new VolunteerCLI(username, in).run();
+            case "ADMIN" -> {
+                new InitWizardCLI(in).run();
+                new RegimeCLI(in).run();
+            }
+        }
+        System.out.println("Arrivederci!");
+    }
+/*
 
     private final Scanner in = new Scanner(System.in);
     private final FilePersistence persistence;
@@ -106,4 +127,5 @@ public class MainCLI {
             }
         }
     }
+*/
 }

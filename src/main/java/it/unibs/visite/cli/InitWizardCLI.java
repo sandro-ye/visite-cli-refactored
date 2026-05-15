@@ -7,8 +7,8 @@ public class InitWizardCLI {
     private final InitWizardController controller;
     private final Scanner in;
 
-    public InitWizardCLI(InitWizardController controller, Scanner in) {
-        this.controller = controller;
+    public InitWizardCLI(Scanner in) {
+        this.controller = new InitWizardController();
         this.in = in;
     }
 
@@ -95,8 +95,10 @@ public class InitWizardCLI {
 
             String titolo = leggiStringa("Titolo: ");
             String descrizione = leggiStringa("Descrizione: ");
-
             controller.aggiungiTipoVisitaALuogo(nomeLuogo, titolo, descrizione);
+
+            new TipoVisitaCLI(titolo, in).run();
+
             System.out.println("Tipo di visita '" + titolo + "' creato per il luogo '" + nomeLuogo + "'.");
 
             creaVolontariPerTipoVisita(titolo);
@@ -130,6 +132,7 @@ public class InitWizardCLI {
             String titolo = leggiStringa("Titolo: ");
             String descrizione = leggiStringa("Descrizione: ");
             controller.aggiungiTipoVisitaALuogo(nomeLuogo, titolo, descrizione);
+            new TipoVisitaCLI(titolo, in).run();
             System.out.println("Tipo di visita '" + titolo + "' creato per il luogo '" + nomeLuogo + "'.");
         }
     }

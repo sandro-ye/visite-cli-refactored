@@ -73,4 +73,8 @@ public class GiornoSediciController {
     public void riapriRaccoltaDisponibilita() {
         plannerService.riapriRaccoltaDisponibilita();
     }
+
+    public void associaVolontarioATipoVisita(String nickname, String titolo) {
+        plannerService.associaVolontarioATipoVisita(nickname, titolo);
+    }
 }

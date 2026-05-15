@@ -12,8 +12,8 @@ public final class VolunteerCLI {
     private final Scanner in;
     private final String nickname; // utente già autenticato
     
-    public VolunteerCLI(VolunteerController controller, String nickname, Scanner in) {
-        this.controller = controller;
+    public VolunteerCLI(String nickname, Scanner in) {
+        this.controller = new VolunteerController();
         this.nickname = nickname;
         this.in = in;
     }

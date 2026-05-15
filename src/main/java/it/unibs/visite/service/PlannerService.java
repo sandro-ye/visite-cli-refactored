@@ -14,6 +14,7 @@ import it.unibs.visite.model.AppPhase;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.repository.memory.*;
+import it.unibs.visite.security.AuthService;
 
 /**
 * Genera il piano mensile di visite proponibili in base alle disponibilità.
@@ -128,6 +129,20 @@ public class PlannerService {
         disponibilitaService.rimuoviDisponibilita(volontario, data);
     }
 
+    public void associaVolontarioATipoVisita(String nickname, String titolo) {
+        Optional<TipoVisita> tipoOpt = tipoVisitaRepository.findByTitolo(titolo);
+        if (tipoOpt.isEmpty()) {
+            throw new IllegalArgumentException("Tipo di visita con titolo " + titolo + " non trovato");
+        }
+        TipoVisita tipo = tipoOpt.get();
+        if (!volontarioRepository.findByNickname(nickname).isPresent()) {
+            throw new IllegalArgumentException("Volontario con nickname " + nickname + " non trovato");
+        }
+        tipo.addVolontario(nickname);
+        tipoVisitaRepository.save(tipo);
+        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, Paths.get("data", "tipi-visita-repo.ser"));
+    }
+
     public List<Volontario> getTuttiVolontari() {
         return volontarioRepository.findAll().stream()
             .sorted(Comparator.comparing(Volontario::getNickname))
@@ -139,6 +154,7 @@ public class PlannerService {
             throw new IllegalArgumentException("Volontario con nickname " + nickname + " già esistente");
         }
         volontarioRepository.save(new Volontario(nickname));
+        new AuthService().createVolunteer(nickname);
         FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
     }
 
@@ -147,6 +163,13 @@ public class PlannerService {
             throw new IllegalArgumentException("Volontario con nickname " + nickname + " non trovato");
         }
         volontarioRepository.delete(nickname);
+        tipoVisitaRepository.findAll().stream()
+            .filter(t -> t.getVolontariNicknames().contains(nickname))
+            .forEach(t -> {
+                t.removeVolontario(nickname);
+                tipoVisitaRepository.save(t);
+            });
+        new AuthService().rimuoviCredenziali(nickname);
         FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
     }
 

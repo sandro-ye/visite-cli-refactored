@@ -8,8 +8,8 @@ public class TipoVisitaCLI {
     private final String nomeTipoVisita; // per identificare il tipo di visita da configurare
     private final Scanner in;
 
-    public TipoVisitaCLI(TipoVisitaController controller, String nomeTipoVisita, Scanner in) {
-        this.controller = controller;
+    public TipoVisitaCLI(String nomeTipoVisita, Scanner in) {
+        this.controller = new TipoVisitaController();
         this.nomeTipoVisita = nomeTipoVisita;
         this.in = in;
     }

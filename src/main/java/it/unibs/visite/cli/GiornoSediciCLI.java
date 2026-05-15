@@ -91,11 +91,13 @@ public class GiornoSediciCLI {
         String choice = in.nextLine().trim();
         System.out.println("1) Aggiungi volontario");
         System.out.println("2) Rimuovi volontario");
+        System.out.println("3) Associa volontario a tipo di visita");
         System.out.println("0) Nessuna gestione volontari, torna al menu precedente");
         System.out.print("Scelta: ");
         switch (choice) {
             case "1" -> aggiungiVolontario();
             case "2" -> rimuoviVolontario();
+            case "3" -> associaVolontarioATipoVisita();
             case "0" -> { return; }
             default -> System.out.println("Scelta non valida.");
         }
@@ -116,6 +118,23 @@ public class GiornoSediciCLI {
         String nickname = in.nextLine().trim();
         controller.rimuoviVolontario(nickname);
         System.out.println("Volontario '" + nickname + "' rimosso con successo.");
+    }
+
+    private void associaVolontarioATipoVisita() {
+        for(Volontario v : controller.getTuttiVolontari()) {
+            System.out.println("- " + v.getNickname());
+        }
+        System.out.print("Inserisci nickname del volontario da associare: ");
+        String nickname = in.nextLine().trim();
+
+        for(TipoVisita t : controller.getTuttiTipiVisita()) {
+            System.out.println("- " + t.getTitolo());
+        }
+        System.out.print("Inserisci titolo del tipo di visita a cui associare il volontario: ");
+        String titolo = in.nextLine().trim();
+
+        controller.associaVolontarioATipoVisita(nickname, titolo);
+        System.out.println("Volontario '" + nickname + "' associato al tipo di visita '" + titolo + "' con successo.");
     }
 
     private void gestioneLuoghi() {
@@ -178,6 +197,7 @@ public class GiornoSediciCLI {
         System.out.println("Inserisci descrizione del tipo di visita (opzionale, invio per saltare): ");
         String descrizione = in.nextLine().trim();
         controller.aggiungiTipoVisita(luogo, titolo, descrizione.isEmpty() ? null : descrizione);
+        new TipoVisitaCLI(titolo, in).run();
         System.out.println("Tipo di visita '" + titolo + "' aggiunto con successo.");
     }
 
