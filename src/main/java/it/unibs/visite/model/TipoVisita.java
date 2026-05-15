@@ -30,7 +30,7 @@ public class TipoVisita implements Serializable {
         this.luogoId = Objects.requireNonNull(luogoId);
         this.titolo = Objects.requireNonNull(titolo);
         this.descrizione = descrizione == null ? "" : descrizione;
-        inizializzaParametri();
+        //inizializzaParametri();
     }
 
     // Costruttore leggero per test (salta inizializzazione parametri non essenziali)
@@ -39,7 +39,7 @@ public class TipoVisita implements Serializable {
         this.luogoId = Objects.requireNonNull(luogoId);
         this.titolo = Objects.requireNonNull(titolo);
         this.descrizione = descrizione == null ? "" : descrizione;
-        if (!skipInput) inizializzaParametri();
+        //if (!skipInput) inizializzaParametri();
     }
 
     // Getters e Setters
@@ -95,7 +95,7 @@ public class TipoVisita implements Serializable {
         Preconditions.check(!volontariNicknames.isEmpty(), "invariante violato: ogni TipoVisita deve avere almeno un volontario");
         Preconditions.check(numeroMassimoPartecipanti >= numeroMinimoPartecipanti, "Numero massimo di partecipanti deve essere maggiore del numero minimo");
     }
-
+/*
     // Metodo per completare il costruttore
     private void inizializzaParametri() {
         @SuppressWarnings("resource")
@@ -212,5 +212,5 @@ public class TipoVisita implements Serializable {
 
         System.out.println("Parametri impostati correttamente.\n");
     }
-
+*/
 }
