@@ -9,9 +9,9 @@ import it.unibs.visite.service.PlannerService;
 
 public class GiornoSediciController {
     private final PlannerService plannerService;
-
-    public GiornoSediciController(PlannerService plannerService) {
-        this.plannerService = plannerService;
+    
+    public GiornoSediciController() {
+        this.plannerService = new PlannerService();
     }
 
     public List<LocalDate> giorniNonPreclusiIn(YearMonth mese) {

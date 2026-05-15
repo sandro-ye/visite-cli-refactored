@@ -6,8 +6,8 @@ import it.unibs.visite.security.AuthService;
 public class LoginController {
     private final AuthService authService;
 
-    public LoginController(AuthService authService) {
-        this.authService = authService;
+    public LoginController() {
+        this.authService = new AuthService();
     }
 
     public LoginResult login(String username, char[] password) {

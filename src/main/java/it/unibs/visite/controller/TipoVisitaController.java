@@ -5,8 +5,8 @@ import it.unibs.visite.service.TipoVisitaService;
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
 
-    public TipoVisitaController(TipoVisitaService tipoVisitaService) {
-        this.tipoVisitaService = tipoVisitaService;
+    public TipoVisitaController() {
+        this.tipoVisitaService = new TipoVisitaService();
     }
 
     public void impostaParametri(String nomeTipoVisita, String puntoIncontro, 

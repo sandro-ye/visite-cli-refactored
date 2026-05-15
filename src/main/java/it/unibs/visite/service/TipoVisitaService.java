@@ -9,9 +9,9 @@ import java.util.*;
 import java.nio.file.Paths;
 
 public class TipoVisitaService {
-    private final it.unibs.visite.repository.TipoVisitaRepository tipoVisitaRepository;
+    private final TipoVisitaRepository tipoVisitaRepository;
 
-    public TipoVisitaService(TipoVisitaRepository tipoVisitaRepository) {
+    public TipoVisitaService() {
         this.tipoVisitaRepository = FileRepositoryPersistence.caricaOggetto(
             Paths.get("data", "tipo_visita_repository.ser"),
             InMemoryTipoVisitaRepository::new

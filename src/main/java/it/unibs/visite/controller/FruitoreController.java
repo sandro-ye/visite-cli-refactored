@@ -10,8 +10,8 @@ import it.unibs.visite.service.FruitoreService;
 public class FruitoreController {
     private final FruitoreService fruitoreService;
 
-    public FruitoreController(FruitoreService fruitoreService) {
-        this.fruitoreService = fruitoreService;
+    public FruitoreController() {
+        this.fruitoreService = new FruitoreService();
     }
 
     public List<Visita> visualizzaVisiteDisponibili() {

@@ -10,8 +10,6 @@ import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.memory.InMemoryArchivioVisite;
 import it.unibs.visite.repository.memory.InMemoryVisitaRepository;
 
-// da sistemare
-
 public class VisitBatchService {
     private final VisitaRepository archivioVisiteRepository;
     private final VisitaRepository visiteRepository;

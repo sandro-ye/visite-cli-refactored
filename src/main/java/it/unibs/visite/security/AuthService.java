@@ -2,6 +2,7 @@ package it.unibs.visite.security;
 
 import it.unibs.visite.persistence.FilePersistence;
 import it.unibs.visite.model.LoginResult;
+import java.nio.file.Path;
 
 /**
  * Servizio di autenticazione e gestione credenziali.
@@ -19,8 +20,8 @@ public class AuthService {
     private final FilePersistence fp;
     private CredentialsStore creds;
     
-    public AuthService(FilePersistence fp) {
-        this.fp = fp;
+    public AuthService() {
+        this.fp = new FilePersistence(Path.of("data"));
 
         Object saved = fp.loadCredentialsOrNull();
         if (saved == null) {

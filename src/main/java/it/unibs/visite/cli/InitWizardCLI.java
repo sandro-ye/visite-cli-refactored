@@ -51,7 +51,6 @@ public class InitWizardCLI {
                 maxPersonePerIscrizione = leggiIntero("Numero massimo di persone per iscrizione: ");
             }
         
-
         controller.avvia(ambito, maxPersonePerIscrizione);
         System.out.println("\nParametri impostati correttamente.\n");
     }
