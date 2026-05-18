@@ -19,13 +19,15 @@ public class LoginCLI {
         stampaMenu();
         int choice = leggiIntero(">");
 
+        String verifiedUsername = null;
+
         switch(choice) {
             case 1 -> {
                 System.out.println("\n=== REGISTRAZIONE FRUITORE ===");
                 String username = leggiStringa("Username: ");
                 String password = leggiStringa("Password: ");
                 loginController.registerUser(username, password.toCharArray());
-                return username;
+                verifiedUsername = username;
             }
             case 2 -> {
                 System.out.println("\n=== LOGIN ===");
@@ -35,11 +37,11 @@ public class LoginCLI {
                 switch (success) {
                     case FIRST_ACCESS -> { 
                         changePassword(username);
-                        return username; 
+                        verifiedUsername = username; 
                     }
                     case SUCCESS -> {
                         System.out.println("Login effettuato con successo.");
-                        return username;
+                        verifiedUsername = username;
                     }
                     case FAILURE -> {
                         System.out.println("Login fallito. Credenziali errate.");
@@ -49,13 +51,13 @@ public class LoginCLI {
             }
             case 0 -> {
                 System.out.println("Uscita in corso...");
-                return null; 
             }
             default -> {
                 System.out.println("Scelta non valida. Riprova.");
                 return run(); // riprova menu
             }
         }
+        return verifiedUsername;
     }
 
     private void stampaMenu() {
