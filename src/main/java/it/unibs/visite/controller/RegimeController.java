@@ -10,19 +10,12 @@ import it.unibs.visite.model.TipoVisita;
 import it.unibs.visite.model.Visita;
 import it.unibs.visite.model.Volontario;
 import it.unibs.visite.service.RegimeService;
-import it.unibs.visite.service.VisitBatchService;
 
 public class RegimeController {
     private final RegimeService regimeService;
-    private final VisitBatchService visitBatchService;
 
     public RegimeController() {
         this.regimeService = new RegimeService();
-        this.visitBatchService = new VisitBatchService();
-    }
-
-    public void eseguiBatch(LocalDate today) {
-        visitBatchService.run(today);
     }
 
     public void aggiungiPreclusione(LocalDate data) {
