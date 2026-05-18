@@ -1,8 +1,10 @@
 package it.unibs.visite.cli;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 import it.unibs.visite.controller.LoginController;
 import it.unibs.visite.security.AuthService;
+import it.unibs.visite.controller.VisitBatchController;
 /*
     - modifica login con LoginCLI
     - modifica wiring di VolunteerCLI
@@ -20,10 +22,12 @@ import it.unibs.visite.security.AuthService;
 public class MainCLI {
     private final Scanner in;
     private final AuthService auth;
+    private final VisitBatchController visitBatchController;
 
     public MainCLI(AuthService auth) {
         this.in = new Scanner(System.in);
         this.auth = auth;
+        this.visitBatchController = new VisitBatchController();
     }
 
     public void run() {
@@ -35,9 +39,16 @@ public class MainCLI {
         String username = loginCLI.run();
 
         switch (auth.getUserRole(username)) {
-            case "FRUITORE" -> new FruitoreCLI(username, in).run();
-            case "VOLONTARIO" -> new VolunteerCLI(username, in).run();
+            case "FRUITORE" -> {
+                visitBatchController.eseguiBatch(LocalDate.now());
+                new FruitoreCLI(username, in).run();
+            }
+            case "VOLONTARIO" -> {
+                visitBatchController.eseguiBatch(LocalDate.now());
+                new VolunteerCLI(username, in).run();
+            }
             case "ADMIN" -> {
+                visitBatchController.eseguiBatch(LocalDate.now());
                 new InitWizardCLI(in).run();
                 new RegimeCLI(in).run();
             }
