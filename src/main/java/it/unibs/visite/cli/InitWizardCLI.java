@@ -5,10 +5,12 @@ import it.unibs.visite.controller.InitWizardController;
 
 public class InitWizardCLI {
     private final InitWizardController controller;
+    private final TipoVisitaCLI tipoVisitaCLI;
     private final Scanner in;
 
-    public InitWizardCLI(Scanner in) {
-        this.controller = new InitWizardController();
+    public InitWizardCLI(Scanner in, InitWizardController controller, TipoVisitaCLI tipoVisitaCLI) {
+        this.controller = controller;
+        this.tipoVisitaCLI = tipoVisitaCLI;
         this.in = in;
     }
 
@@ -96,8 +98,7 @@ public class InitWizardCLI {
             String titolo = leggiStringa("Titolo: ");
             String descrizione = leggiStringa("Descrizione: ");
             controller.aggiungiTipoVisitaALuogo(nomeLuogo, titolo, descrizione);
-
-            new TipoVisitaCLI(titolo, in).run();
+            tipoVisitaCLI.completaCreazione(titolo);
 
             System.out.println("Tipo di visita '" + titolo + "' creato per il luogo '" + nomeLuogo + "'.");
 
@@ -132,7 +133,7 @@ public class InitWizardCLI {
             String titolo = leggiStringa("Titolo: ");
             String descrizione = leggiStringa("Descrizione: ");
             controller.aggiungiTipoVisitaALuogo(nomeLuogo, titolo, descrizione);
-            new TipoVisitaCLI(titolo, in).run();
+            tipoVisitaCLI.completaCreazione(titolo);
             System.out.println("Tipo di visita '" + titolo + "' creato per il luogo '" + nomeLuogo + "'.");
         }
     }

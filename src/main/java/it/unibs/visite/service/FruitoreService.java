@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
-import it.unibs.visite.repository.memory.*;
 import it.unibs.visite.core.Preconditions;
 
 /**
@@ -25,19 +24,11 @@ public class FruitoreService {
     private final TipoVisitaRepository tipoVisitaRepo;
     private final FruitoreRepository fruitoreRepo;
 
-    public FruitoreService() {
-        this.visitaRepo = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "visite-repo.ser"),
-            InMemoryVisitaRepository::new);
-        this.tipoVisitaRepo = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "tipi-visita-repo.ser"),
-            InMemoryTipoVisitaRepository::new);
-        this.parametriRepo = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "parametri-sistema.ser"),
-            InMemoryParametriSistemaRepository::new);
-        this.fruitoreRepo = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "fruitori.ser"),
-            InMemoryFruitoreRepository::new);
+    public FruitoreService(ParametriSistemaRepository parametriRepo, VisitaRepository visitaRepo, TipoVisitaRepository tipoVisitaRepo, FruitoreRepository fruitoreRepo) {
+        this.parametriRepo = parametriRepo;
+        this.visitaRepo = visitaRepo;
+        this.tipoVisitaRepo = tipoVisitaRepo;
+        this.fruitoreRepo = fruitoreRepo;
     }
 
     public List<Visita> getVisiteDisponibili() {

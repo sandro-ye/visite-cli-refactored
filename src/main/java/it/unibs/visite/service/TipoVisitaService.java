@@ -2,7 +2,6 @@ package it.unibs.visite.service;
 
 import it.unibs.visite.repository.TipoVisitaRepository;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
-import it.unibs.visite.repository.memory.InMemoryTipoVisitaRepository;
 import it.unibs.visite.model.TipoVisita;
 import java.time.*;
 import java.util.*;
@@ -11,11 +10,8 @@ import java.nio.file.Paths;
 public class TipoVisitaService {
     private final TipoVisitaRepository tipoVisitaRepository;
 
-    public TipoVisitaService() {
-        this.tipoVisitaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "tipo_visita_repository.ser"),
-            InMemoryTipoVisitaRepository::new
-        );
+    public TipoVisitaService(TipoVisitaRepository tipoVisitaRepository) {
+        this.tipoVisitaRepository = tipoVisitaRepository;
     }
 
     public void impostaParametri(String nomeTipoVisita, String puntoIncontro, 

@@ -14,8 +14,8 @@ import it.unibs.visite.service.RegimeService;
 public class RegimeController {
     private final RegimeService regimeService;
 
-    public RegimeController() {
-        this.regimeService = new RegimeService();
+    public RegimeController(RegimeService regimeService) {
+        this.regimeService = regimeService;
     }
 
     public void aggiungiPreclusione(LocalDate data) {

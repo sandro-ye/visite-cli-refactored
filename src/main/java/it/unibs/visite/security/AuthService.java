@@ -1,9 +1,8 @@
 package it.unibs.visite.security;
 
-import it.unibs.visite.persistence.FilePersistence;
-import it.unibs.visite.service.FruitoreService;
-import it.unibs.visite.model.LoginResult;
 import java.nio.file.Path;
+import it.unibs.visite.persistence.FilePersistence;
+import it.unibs.visite.model.LoginResult;
 
 /**
  * Servizio di autenticazione e gestione credenziali.
@@ -15,6 +14,8 @@ import java.nio.file.Path;
  * 
  * possibile unione di metodo per creare credeziali di volontario fruitore e configuratore in un unico metodo 
  * con parametro ruolo
+ * 
+ * !!! - verificare se è necessario aggiungere metodo che crei anche il fruitore nel FruitoreRepository quando si crea un nuovo fruitore (creazione credenziali + creazione fruitore)
  */
 
 public class AuthService {
@@ -22,6 +23,12 @@ public class AuthService {
     private CredentialsStore creds;
     private static final String DEFAULT_VOLUNTEER_PASSWORD = "volontario";
     
+    public AuthService(FilePersistence fp, CredentialsStore creds) {
+        this.fp = fp;
+        this.creds = creds;
+    }
+
+     
     public AuthService() {
         this.fp = new FilePersistence(Path.of("data"));
 
@@ -37,8 +44,7 @@ public class AuthService {
             this.creds = (CredentialsStore) saved;
         }
     }
-
-    public CredentialsStore getCredentialsStore() { return creds; }
+    
 
     public LoginResult login(String username, char[] password) {
         if(!creds.verify(username, password)) {
@@ -113,7 +119,6 @@ public class AuthService {
         }
         creds.putNewUser(username, password, false, "FRUITORE");
         fp.saveCredentials(creds);
-        new FruitoreService().registraFruitore(username);
     }
 
     // === NUOVO: controlla ruolo fruitore ===

@@ -5,16 +5,14 @@ import it.unibs.visite.controller.TipoVisitaController;
 
 public class TipoVisitaCLI {
     private final TipoVisitaController controller;
-    private final String nomeTipoVisita; // per identificare il tipo di visita da configurare
     private final Scanner in;
 
-    public TipoVisitaCLI(String nomeTipoVisita, Scanner in) {
-        this.controller = new TipoVisitaController();
-        this.nomeTipoVisita = nomeTipoVisita;
+    public TipoVisitaCLI(Scanner in, TipoVisitaController controller) {
+        this.controller = controller;
         this.in = in;
     }
 
-    public void run() {
+    public void completaCreazione(String nomeTipoVisita) {
         System.out.println("=== SETUP TIPO VISITA ===");
 
         String puntoIncontro = leggiStringa("Punto d'incontro: ");

@@ -4,7 +4,6 @@ import it.unibs.visite.core.DomainException;
 import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
-import it.unibs.visite.repository.memory.*;
 
 import java.nio.file.Paths;
 import java.time.*;
@@ -14,13 +13,9 @@ public class DisponibilitaService {
     private final PreclusioneRepository preclusioneRepository;
     private final VolontarioRepository volontarioRepository;
 
-    public DisponibilitaService() {
-        this.preclusioneRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "preclusioni.ser"),
-            InMemoryPreclusioneRepository::new);
-        this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "volontari.ser"), 
-            InMemoryVolontarioRepository::new);
+    public DisponibilitaService(PreclusioneRepository preclusioneRepository, VolontarioRepository volontarioRepository) {
+        this.preclusioneRepository = preclusioneRepository;
+        this.volontarioRepository = volontarioRepository;
     }
 
     public void aggiungiDisponibilita(String nickname, LocalDate data) {

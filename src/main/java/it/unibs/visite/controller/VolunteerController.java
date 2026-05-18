@@ -9,9 +9,9 @@ import java.util.List;
 
 public class VolunteerController {
     private final DisponibilitaService disponibilitaService;
-
-    public VolunteerController() {
-        this.disponibilitaService = new DisponibilitaService();
+    
+    public VolunteerController(DisponibilitaService disponibilitaService) {
+        this.disponibilitaService = disponibilitaService;
     }
 
     public List<DisponibilitaVolontario> visualizzaDisponibilita(String nickname, YearMonth mese) {

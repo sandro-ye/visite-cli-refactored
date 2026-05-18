@@ -20,6 +20,9 @@ public class CredentialsStore implements Serializable {
         public boolean mustChangePassword;
         public String role;
     }
+
+    public CredentialsStore() {}
+
     private final Map<String, Entry> users = new HashMap<>();
 
     public Map<String, Entry> getUsers() { return users; }

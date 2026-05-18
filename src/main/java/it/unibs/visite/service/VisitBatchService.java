@@ -7,22 +7,14 @@ import java.nio.file.Paths;
 
 import it.unibs.visite.repository.VisitaRepository;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
-import it.unibs.visite.repository.memory.InMemoryArchivioVisite;
-import it.unibs.visite.repository.memory.InMemoryVisitaRepository;
 
 public class VisitBatchService {
     private final VisitaRepository archivioVisiteRepository;
     private final VisitaRepository visiteRepository;
 
-    public VisitBatchService() {
-        this.archivioVisiteRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "archivio_visite_repository.ser"),
-            InMemoryArchivioVisite::new
-        );
-        this.visiteRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "visite_repository.ser"),
-            InMemoryVisitaRepository::new
-        );
+    public VisitBatchService(VisitaRepository archivioVisiteRepository, VisitaRepository visiteRepository) {
+        this.archivioVisiteRepository = archivioVisiteRepository;
+        this.visiteRepository = visiteRepository;
     }
 
     public void run(LocalDate today) {

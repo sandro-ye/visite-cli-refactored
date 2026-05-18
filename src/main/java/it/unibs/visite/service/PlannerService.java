@@ -13,7 +13,6 @@ import it.unibs.visite.model.AppPhase;
 
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
-import it.unibs.visite.repository.memory.*;
 import it.unibs.visite.security.AuthService;
 
 /**
@@ -30,26 +29,16 @@ public class PlannerService {
     private final LuogoRepository luogoRepository;
     private final DisponibilitaService disponibilitaService;
 
-    public PlannerService() {
-        this.parametriSistemaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "parametri-sistema.ser"),
-            InMemoryParametriSistemaRepository::new);
-        this.visitaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "visite-repo.ser"),
-            InMemoryVisitaRepository::new);
-        this.preclusioneRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "preclusioni.ser"),
-            InMemoryPreclusioneRepository::new);
-        this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "volontari.ser"),
-            InMemoryVolontarioRepository::new);
-        this.tipoVisitaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "tipi-visita-repo.ser"),
-            InMemoryTipoVisitaRepository::new);
-        this.luogoRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "luoghi-repo.ser"),
-            InMemoryLuogoRepository::new);
-        this.disponibilitaService = new DisponibilitaService();
+    public PlannerService(ParametriSistemaRepository parametriSistemaRepository, PreclusioneRepository preclusioneRepository, 
+                VolontarioRepository volontarioRepository, VisitaRepository visitaRepository, 
+                TipoVisitaRepository tipoVisitaRepository, LuogoRepository luogoRepository, DisponibilitaService disponibilitaService) {
+        this.parametriSistemaRepository = parametriSistemaRepository;
+        this.preclusioneRepository = preclusioneRepository;
+        this.volontarioRepository = volontarioRepository;
+        this.visitaRepository = visitaRepository;
+        this.tipoVisitaRepository = tipoVisitaRepository;
+        this.luogoRepository = luogoRepository;
+        this.disponibilitaService = disponibilitaService;
     }
 
     public List<LocalDate> giorniNonPreclusiIn(YearMonth mese) {

@@ -8,7 +8,6 @@ import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
-import it.unibs.visite.repository.memory.*;
 import it.unibs.visite.security.AuthService;
 
 // vedere se togliere validateInvariants o se spostarla in un'altra classe
@@ -19,23 +18,11 @@ public class InitWizardService{
     private final VolontarioRepository volontarioRepository;
     private final TipoVisitaRepository tipoVisitaRepository;
 
-    public InitWizardService() {
-        this.parametriSistemaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "parametri-sistema.ser"),
-            InMemoryParametriSistemaRepository::new
-        );
-        this.luogoRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "luogo-repository.ser"),
-            InMemoryLuogoRepository::new
-        );
-        this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "volontario-repository.ser"),
-            InMemoryVolontarioRepository::new
-        );
-        this.tipoVisitaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "tipo-visita-repository.ser"),
-            InMemoryTipoVisitaRepository::new
-        );
+    public InitWizardService(ParametriSistemaRepository parametriSistemaRepository, LuogoRepository luogoRepository, VolontarioRepository volontarioRepository, TipoVisitaRepository tipoVisitaRepository) {
+        this.parametriSistemaRepository = parametriSistemaRepository;
+        this.luogoRepository = luogoRepository;
+        this.volontarioRepository = volontarioRepository;
+        this.tipoVisitaRepository = tipoVisitaRepository;
     }
 
     public boolean isInitialized() {

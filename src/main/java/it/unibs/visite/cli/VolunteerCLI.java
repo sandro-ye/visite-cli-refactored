@@ -10,24 +10,22 @@ import java.util.*;
 public final class VolunteerCLI {
     private final VolunteerController controller;
     private final Scanner in;
-    private final String nickname; // utente già autenticato
     
-    public VolunteerCLI(String nickname, Scanner in) {
-        this.controller = new VolunteerController();
-        this.nickname = nickname;
+    public VolunteerCLI(Scanner in, VolunteerController controller) {
+        this.controller = controller;
         this.in = in;
     }
 
-    public void run() {
+    public void run(String nickname) {
         System.out.println("=== Area VOLONTARIO ===");
         try {
-            mainMenu();
+            mainMenu(nickname);
         } finally {
             System.out.println("Logout eseguito.\n");
         }
     }
 
-    private void mainMenu() {
+    private void mainMenu(String nickname) {
         while (true) {
             System.out.printf("\n--- Menu Volontario %s ---\n", nickname);
             System.out.println("1) I miei tipi di visita");
@@ -37,16 +35,16 @@ public final class VolunteerCLI {
             System.out.print("Scelta: ");
             String s = in.nextLine().trim();
             switch (s) {
-                case "1" -> mostraTipiVisita();
-                case "2" -> inserisciDisponibilita();
-                case "3" -> revocaDisponibilita();
+                case "1" -> mostraTipiVisita(nickname);
+                case "2" -> inserisciDisponibilita(nickname);
+                case "3" -> revocaDisponibilita(nickname);
                 case "0" -> { return; }
                 default -> System.out.println("Scelta non valida.");
             }
         }
     }
 
-    private void mostraTipiVisita() {
+    private void mostraTipiVisita(String nickname) {
         List<TipoVisita> tipi = controller.visualizzaTipiVisita(nickname);
         if (tipi.isEmpty()) {
             System.out.println("Nessun tipo di visita associato.");
@@ -57,7 +55,7 @@ public final class VolunteerCLI {
         }
     }
 
-    private void inserisciDisponibilita() {
+    private void inserisciDisponibilita(String nickname) {
         YearMonth ym = controller.meseSuccessivo();
         System.out.println("Inserisci date disponibili nel mese entrante: " + ym);
         while(in.hasNextLine()) { 
@@ -77,7 +75,7 @@ public final class VolunteerCLI {
         }
     }
 
-    private void revocaDisponibilita() {
+    private void revocaDisponibilita(String nickname) {
         YearMonth ym = controller.meseSuccessivo();
         List<LocalDate> dates = new ArrayList<>();
         try {

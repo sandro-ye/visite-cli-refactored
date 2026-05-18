@@ -6,8 +6,8 @@ import it.unibs.visite.service.VisitBatchService;
 public class VisitBatchController {
     private final VisitBatchService visitBatchService;
 
-    public VisitBatchController() {
-        this.visitBatchService = new VisitBatchService();
+    public VisitBatchController(VisitBatchService visitBatchService) {
+        this.visitBatchService = visitBatchService;
     }
 
     public void eseguiBatch(LocalDate today) {

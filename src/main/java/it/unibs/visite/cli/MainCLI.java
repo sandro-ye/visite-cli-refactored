@@ -1,10 +1,6 @@
 package it.unibs.visite.cli;
 
-import java.time.LocalDate;
-import java.util.Scanner;
-import it.unibs.visite.controller.LoginController;
 import it.unibs.visite.security.AuthService;
-import it.unibs.visite.controller.VisitBatchController;
 /*
     - modifica login con LoginCLI
     - modifica wiring di VolunteerCLI
@@ -20,14 +16,20 @@ import it.unibs.visite.controller.VisitBatchController;
  */
 
 public class MainCLI {
-    private final Scanner in;
     private final AuthService auth;
-    private final VisitBatchController visitBatchController;
+    private final LoginCLI loginCLI;
+    private final FruitoreCLI fruitoreCLI;  
+    private final VolunteerCLI volunteerCLI;
+    private final RegimeCLI regimeCLI;
+    private final InitWizardCLI initWizardCLI;
 
-    public MainCLI(AuthService auth) {
-        this.in = new Scanner(System.in);
+    public MainCLI(AuthService auth, LoginCLI loginCLI, FruitoreCLI fruitoreCLI, VolunteerCLI volunteerCLI, RegimeCLI regimeCLI, InitWizardCLI initWizardCLI) {
         this.auth = auth;
-        this.visitBatchController = new VisitBatchController();
+        this.loginCLI = loginCLI;
+        this.fruitoreCLI = fruitoreCLI;
+        this.volunteerCLI = volunteerCLI;
+        this.regimeCLI = regimeCLI;
+        this.initWizardCLI = initWizardCLI;
     }
 
     public void run() {
@@ -35,22 +37,18 @@ public class MainCLI {
         System.out.println("|    VISITE CLI    |");
         System.out.println("--------------------");
 
-        LoginCLI loginCLI = new LoginCLI(new LoginController(), in);
         String username = loginCLI.run();
 
         switch (auth.getUserRole(username)) {
             case "FRUITORE" -> {
-                visitBatchController.eseguiBatch(LocalDate.now());
-                new FruitoreCLI(username, in).run();
+                fruitoreCLI.run(username);
             }
             case "VOLONTARIO" -> {
-                visitBatchController.eseguiBatch(LocalDate.now());
-                new VolunteerCLI(username, in).run();
+                volunteerCLI.run(username);
             }
             case "ADMIN" -> {
-                visitBatchController.eseguiBatch(LocalDate.now());
-                new InitWizardCLI(in).run();
-                new RegimeCLI(in).run();
+                initWizardCLI.run();
+                regimeCLI.run();
             }
         }
         System.out.println("Arrivederci!");

@@ -13,9 +13,9 @@ public class RegimeCLI {
     private final RegimeController regimeController;
     private final Scanner in;
 
-    public RegimeCLI(Scanner in) {
+    public RegimeCLI(Scanner in, RegimeController regimeController) {
         this.in = in;
-        this.regimeController = new RegimeController();
+        this.regimeController = regimeController;
     }
 
     public void run() {

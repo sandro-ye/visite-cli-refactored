@@ -8,8 +8,8 @@ import java.util.List;
 public class InitWizardController {
     private final InitWizardService service;
 
-    public InitWizardController() {
-        this.service = new InitWizardService();
+    public InitWizardController(InitWizardService service) {
+        this.service = service;
     }
 
     public void avvia(String ambito, int maxPersonePerIscrizione) {

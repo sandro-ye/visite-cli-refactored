@@ -4,7 +4,6 @@ import it.unibs.visite.core.DomainException;
 import it.unibs.visite.model.*;
 import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
-import it.unibs.visite.repository.memory.*;
 
 import java.time.*;
 import java.util.*;
@@ -20,28 +19,16 @@ public class RegimeService {
     private final LuogoRepository luogoRepository;
     private final TipoVisitaRepository tipoVisitaRepository;
 
-    public RegimeService() {
-        this.preclusioneRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "preclusioni.ser"),
-            InMemoryPreclusioneRepository::new);
-        this.visitaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "visite-repo.ser"),
-            InMemoryVisitaRepository::new);
-        this.archivioRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "archivio-repo.ser"),
-            InMemoryVisitaRepository::new);
-        this.parametriSistemaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "parametri-sistema.ser"),
-            InMemoryParametriSistemaRepository::new);
-        this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "volontari.ser"),
-            InMemoryVolontarioRepository::new);
-        this.luogoRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "luoghi-repo.ser"),
-            InMemoryLuogoRepository::new);
-        this.tipoVisitaRepository = FileRepositoryPersistence.caricaOggetto(
-            Paths.get("data", "tipi-visita-repo.ser"),
-            InMemoryTipoVisitaRepository::new);
+    public RegimeService(PreclusioneRepository preclusioneRepository, VisitaRepository visitaRepository, VisitaRepository archivioRepository, 
+                ParametriSistemaRepository parametriSistemaRepository, VolontarioRepository volontarioRepository, 
+                LuogoRepository luogoRepository, TipoVisitaRepository tipoVisitaRepository) {
+        this.preclusioneRepository = preclusioneRepository;
+        this.visitaRepository = visitaRepository;
+        this.archivioRepository = archivioRepository;
+        this.parametriSistemaRepository = parametriSistemaRepository;
+        this.volontarioRepository = volontarioRepository;
+        this.luogoRepository = luogoRepository;
+        this.tipoVisitaRepository = tipoVisitaRepository;
     }
     
     public void aggiungiPreclusione(LocalDate data) {

@@ -18,11 +18,13 @@ import java.util.*;
  */
 public class GiornoSediciCLI {
     private final GiornoSediciController controller;
+    private final TipoVisitaCLI tipoVisitaCLI;
     private final Scanner in;
 
-    public GiornoSediciCLI(GiornoSediciController controller, Scanner in) {
+    public GiornoSediciCLI(GiornoSediciController controller, TipoVisitaCLI tipoVisitaCLI, Scanner in) {
         this.in = in;
         this.controller = controller;
+        this.tipoVisitaCLI = tipoVisitaCLI;
     }
 
     public void run() {
@@ -197,7 +199,7 @@ public class GiornoSediciCLI {
         System.out.println("Inserisci descrizione del tipo di visita (opzionale, invio per saltare): ");
         String descrizione = in.nextLine().trim();
         controller.aggiungiTipoVisita(luogo, titolo, descrizione.isEmpty() ? null : descrizione);
-        new TipoVisitaCLI(titolo, in).run();
+        tipoVisitaCLI.completaCreazione(titolo);
         System.out.println("Tipo di visita '" + titolo + "' aggiunto con successo.");
     }
 

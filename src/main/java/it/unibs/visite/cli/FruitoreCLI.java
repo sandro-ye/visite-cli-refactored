@@ -13,18 +13,15 @@ import java.util.*;
  * - Gestisce eccezioni senza far crashare l'app.
  */
 public class FruitoreCLI {
-
-    private final String username;
     private final Scanner in;
     private final FruitoreController controller;
 
-    public FruitoreCLI(String username, Scanner in) {
-        this.controller = new FruitoreController();
-        this.username = username;
+    public FruitoreCLI(Scanner in, FruitoreController controller) {
+        this.controller = controller;
         this.in = in;
     }
 
-    public void run() {
+    public void run(String username) {
         while (true) {
             System.out.println("\n=== MENU FRUITORE ===");
             System.out.println("1) Visualizza visite disponibili");
@@ -37,9 +34,9 @@ public class FruitoreCLI {
 
             switch (choice) {
                 case "1" -> mostraDisponibili();
-                case "2" -> iscriviti();
-                case "3" -> mieIscrizioni();
-                case "4" -> disdici();
+                case "2" -> iscriviti(username);
+                case "3" -> mieIscrizioni(username);
+                case "4" -> disdici(username);
                 case "0" -> {
                     System.out.println("Logout. Arrivederci!");
                     return;
@@ -80,7 +77,7 @@ public class FruitoreCLI {
 
     private String safe(String s) { return (s == null ? "-" : s); }
 
-    private void iscriviti() {
+    private void iscriviti(String username) {
         mostraDisponibili();
         System.out.print("\nInserisci l'id della visita a cui iscriversi: ");
         String idVisita = in.nextLine().trim();
@@ -90,13 +87,13 @@ public class FruitoreCLI {
         controller.iscriviAVisita(username, idVisita, numeroPersone);
     }
 
-    private void mieIscrizioni() {  
+    private void mieIscrizioni(String username) {  
         System.out.println("-- le mie iscrizioni --");
         List<Iscrizione> mie = controller.getIscrizioniDi(username);
-        stampaElencoIscrizioni(mie);
+        stampaElencoIscrizioni(username, mie);
     }
 
-    private void stampaElencoIscrizioni(List<Iscrizione> iscrizioni) {
+    private void stampaElencoIscrizioni(String username, List<Iscrizione> iscrizioni) {
         if (iscrizioni == null || iscrizioni.isEmpty()) {
             System.out.println("nessuna iscrizione trovata");
             return;
@@ -118,8 +115,8 @@ public class FruitoreCLI {
         }
     }
 
-    private void disdici() {
-        mieIscrizioni();
+    private void disdici(String username) {
+        mieIscrizioni(username);
         System.out.println("-- disdetta iscrizione --");
         System.out.print("Inserisci il codice prenotazione: ");
         String codice = in.nextLine().trim();
