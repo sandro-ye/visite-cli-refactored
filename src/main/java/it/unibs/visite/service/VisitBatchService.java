@@ -14,7 +14,7 @@ public class VisitBatchService {
     private final VisitaRepository archivioVisiteRepository;
     private final VisitaRepository visiteRepository;
 
-    public VisitBatchService(VisitaRepository archivioVisiteRepository, VisitaRepository visiteRepository) {
+    public VisitBatchService() {
         this.archivioVisiteRepository = FileRepositoryPersistence.caricaOggetto(
             Paths.get("data", "archivio_visite_repository.ser"),
             InMemoryArchivioVisite::new
