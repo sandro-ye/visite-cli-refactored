@@ -1,17 +1,11 @@
 package it.unibs.visite.service;
 
-import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import it.unibs.visite.model.Visita;
-import it.unibs.visite.model.Volontario;
-import it.unibs.visite.model.TipoVisita;
-import it.unibs.visite.model.Luogo;
-import it.unibs.visite.model.AppPhase;
+import it.unibs.visite.model.*;
 
-import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.security.AuthService;
 
@@ -28,10 +22,11 @@ public class PlannerService {
     private final TipoVisitaRepository tipoVisitaRepository;
     private final LuogoRepository luogoRepository;
     private final DisponibilitaService disponibilitaService;
+    private final AuthService authService;
 
     public PlannerService(ParametriSistemaRepository parametriSistemaRepository, PreclusioneRepository preclusioneRepository, 
                 VolontarioRepository volontarioRepository, VisitaRepository visitaRepository, 
-                TipoVisitaRepository tipoVisitaRepository, LuogoRepository luogoRepository, DisponibilitaService disponibilitaService) {
+                TipoVisitaRepository tipoVisitaRepository, LuogoRepository luogoRepository, DisponibilitaService disponibilitaService, AuthService authService) {
         this.parametriSistemaRepository = parametriSistemaRepository;
         this.preclusioneRepository = preclusioneRepository;
         this.volontarioRepository = volontarioRepository;
@@ -39,6 +34,7 @@ public class PlannerService {
         this.tipoVisitaRepository = tipoVisitaRepository;
         this.luogoRepository = luogoRepository;
         this.disponibilitaService = disponibilitaService;
+        this.authService = authService;
     }
 
     public List<LocalDate> giorniNonPreclusiIn(YearMonth mese) {
@@ -112,7 +108,6 @@ public class PlannerService {
         );
         visita.setVolontarioNickname(volontario);
         visitaRepository.save(visita);
-        FileRepositoryPersistence.salvaOggetto(visitaRepository, Paths.get("data", "visite-repo.ser"));
 
         // Aggiorna le disponibilità del volontario per quel mese
         disponibilitaService.rimuoviDisponibilita(volontario, data);
@@ -129,7 +124,6 @@ public class PlannerService {
         }
         tipo.addVolontario(nickname);
         tipoVisitaRepository.save(tipo);
-        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, Paths.get("data", "tipi-visita-repo.ser"));
     }
 
     public List<Volontario> getTuttiVolontari() {
@@ -143,8 +137,7 @@ public class PlannerService {
             throw new IllegalArgumentException("Volontario con nickname " + nickname + " già esistente");
         }
         volontarioRepository.save(new Volontario(nickname));
-        new AuthService().createVolunteer(nickname);
-        FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
+        authService.createVolunteer(nickname);
     }
 
     public void rimuoviVolontario(String nickname) {
@@ -158,8 +151,7 @@ public class PlannerService {
                 t.removeVolontario(nickname);
                 tipoVisitaRepository.save(t);
             });
-        new AuthService().rimuoviCredenziali(nickname);
-        FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
+        authService.rimuoviCredenziali(nickname);
     }
 
     public void aggiungiPreclusione(LocalDate data) {
@@ -171,7 +163,6 @@ public class PlannerService {
             throw new IllegalArgumentException("Preclusione per la data " + data + " già esistente");
         }
         preclusioneRepository.add(data);
-        FileRepositoryPersistence.salvaOggetto(preclusioneRepository, Paths.get("data", "preclusioni.ser"));
     }
 
     public List<Luogo> getTuttiLuoghi() {
@@ -187,7 +178,6 @@ public class PlannerService {
         }
         Luogo nuovoLuogo = new Luogo(nome, descrizione);
         luogoRepository.save(nuovoLuogo);
-        FileRepositoryPersistence.salvaOggetto(luogoRepository, Paths.get("data", "luoghi-repo.ser"));
     }
 
     public void rimuoviLuogo(String nome) {
@@ -196,7 +186,6 @@ public class PlannerService {
             throw new IllegalArgumentException("Luogo con nome " + nome + " non trovato");
         }
         luogoRepository.deleteLuogo(luogoOpt.get().getId());
-        FileRepositoryPersistence.salvaOggetto(luogoRepository, Paths.get("data", "luoghi-repo.ser"));
     }
 
     public List<TipoVisita> getTuttiTipiVisita() {
@@ -212,7 +201,6 @@ public class PlannerService {
         }
         TipoVisita tipo = new TipoVisita(luogoOpt.get().getId(), titolo, descrizione);
         tipoVisitaRepository.save(tipo);
-        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, Paths.get("data", "tipi-visita-repo.ser"));
     }
 
     public void rimuoviTipoVisita(String titolo) {
@@ -222,12 +210,10 @@ public class PlannerService {
             throw new IllegalArgumentException("Tipo di visita con titolo " + titolo + " non trovato");
         }
         tipoVisitaRepository.delete(tipoOpt.get().getId());
-        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, Paths.get("data", "tipi-visita-repo.ser"));
     }
 
     public void riapriRaccoltaDisponibilita() {
         parametriSistemaRepository.load().setAppPhase(AppPhase.RACCOLTA_DISPONIBILITA);
-        FileRepositoryPersistence.salvaOggetto(parametriSistemaRepository, Paths.get("data", "parametri-sistema.ser"));
     }
 }
 

@@ -1,7 +1,6 @@
 package it.unibs.visite.security;
 
-import java.nio.file.Path;
-import it.unibs.visite.persistence.FilePersistence;
+import it.unibs.visite.repository.CredentialsRepository;
 import it.unibs.visite.model.LoginResult;
 
 /**
@@ -19,32 +18,14 @@ import it.unibs.visite.model.LoginResult;
  */
 
 public class AuthService {
-    private final FilePersistence fp;
-    private CredentialsStore creds;
+    private final CredentialsRepository repository;
+    private final CredentialsStore creds;
     private static final String DEFAULT_VOLUNTEER_PASSWORD = "volontario";
     
-    public AuthService(FilePersistence fp, CredentialsStore creds) {
-        this.fp = fp;
+    public AuthService(CredentialsRepository credsRepo, CredentialsStore creds) {
+        this.repository  = credsRepo;
         this.creds = creds;
     }
-
-     
-    public AuthService() {
-        this.fp = new FilePersistence(Path.of("data"));
-
-        Object saved = fp.loadCredentialsOrNull();
-        if (saved == null) {
-            this.creds = new CredentialsStore();
-            // utente configuratore iniziale (default admin/admin)
-            // true = deve cambiare password al primo login
-            creds.putNewUser("admin", "admin".toCharArray(), true, "ADMIN");
-            creds.putNewUser("volontario", "volontario".toCharArray(), true, "VOLUNTEER");
-            fp.saveCredentials(creds);
-        } else {
-            this.creds = (CredentialsStore) saved;
-        }
-    }
-    
 
     public LoginResult login(String username, char[] password) {
         if(!creds.verify(username, password)) {
@@ -66,31 +47,21 @@ public class AuthService {
             throw new IllegalArgumentException("Password non corrispondenti");
         }
         creds.changePassword(username, pass1);
-        fp.saveCredentials(creds);
+        repository.save(creds);
     }
 
     // crea un nuovo configuratore (amministratore)
     public void createConfigurator(String username, char[] password) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username non valido per la creazione del configuratore");
-        }
-        if (creds.getUsers().containsKey(username)) {
-            throw new IllegalArgumentException("Username già esistente: " + username);
-        }
+        validateUsername(username);
         creds.putNewUser(username, password, false, "ADMIN");
-        fp.saveCredentials(creds);
+        repository.save(creds);
     }
 
     // === NUOVO: crea un volontario ===
     public void createVolunteer(String username) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username non valido per la creazione del volontario");
-        }
-        if (creds.getUsers().containsKey(username)) {
-            throw new IllegalArgumentException("Username già esistente: " + username);
-        }
+        validateUsername(username);
         creds.putNewUser(username, DEFAULT_VOLUNTEER_PASSWORD.toCharArray(), true, "VOLUNTEER");
-        fp.saveCredentials(creds);
+        repository.save(creds);
     }
 
     // === NUOVO: controlla ruolo admin ===
@@ -107,18 +78,14 @@ public class AuthService {
 
     public void rimuoviCredenziali(String username) {
         creds.rimuoviCredenziali(username);
+        repository.save(creds);
     }
 
     // === versione 4 ===
     public void createFruitore(String username, char[] password) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username non valido per la creazione del fruitore");
-        }
-        if (creds.getUsers().containsKey(username)) {
-            throw new IllegalArgumentException("Username già esistente: " + username);
-        }
+        validateUsername(username);
         creds.putNewUser(username, password, false, "FRUITORE");
-        fp.saveCredentials(creds);
+        repository.save(creds);
     }
 
     // === NUOVO: controlla ruolo fruitore ===
@@ -130,5 +97,15 @@ public class AuthService {
     public String getUserRole(String username) {
         CredentialsStore.Entry e = creds.getUsers().get(username);
         return e != null ? e.role : null;
+    }
+
+    private void validateUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username non valido");
+        }
+
+        if (creds.getUsers().containsKey(username)) {
+            throw new IllegalArgumentException("Username già esistente: " + username);
+        }
     }
 }

@@ -1,11 +1,10 @@
 package it.unibs.visite.service;
 
-import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import it.unibs.visite.model.*;
-import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.core.Preconditions;
 
@@ -60,8 +59,6 @@ public class FruitoreService {
         Iscrizione iscrizione = visita.aggiungiIscrizione(fruitore, numeroPersone);
         fruitore.addIscrizione(iscrizione);
         fruitoreRepo.save(fruitore);
-
-        saveAll();
     }
 
     public List<Iscrizione> getIscrizioniDi(String usernameFruitore) {
@@ -93,8 +90,6 @@ public class FruitoreService {
         visitaRepo.save(visita);
         fruitore.removeIscrizione(codiceIscrizione);
         fruitoreRepo.save(fruitore);
-
-        saveAll();
     }
 
     public int getMaxPersonePerIscrizione() {
@@ -119,17 +114,8 @@ public class FruitoreService {
         }
         Fruitore f = new Fruitore(username);
         fruitoreRepo.save(f);
-        saveAll();
     }
-
-    private void saveAll() {
-        FileRepositoryPersistence.salvaOggetto(visitaRepo, Paths.get("data", "visite-repo.ser"));
-        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepo, Paths.get("data", "tipi-visita-repo.ser"));
-        FileRepositoryPersistence.salvaOggetto(parametriRepo, Paths.get("data", "parametri-sistema.ser"));
-        FileRepositoryPersistence.salvaOggetto(fruitoreRepo, Paths.get("data", "fruitori.ser"));
-    }
-
-    /*
+/*
     public FruitoreService(ConfigService config, Fruitore fruitore){
         this.config = config; this.fruitore = fruitore;
         // registra il fruitore nel sistema (persistenza su file)

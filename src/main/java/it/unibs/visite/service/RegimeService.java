@@ -2,13 +2,11 @@ package it.unibs.visite.service;
 
 import it.unibs.visite.core.DomainException;
 import it.unibs.visite.model.*;
-import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.nio.file.Paths;
 
 public class RegimeService {
     private final PreclusioneRepository preclusioneRepository;
@@ -46,7 +44,6 @@ public class RegimeService {
         }
         
         preclusioneRepository.add(data);
-        FileRepositoryPersistence.salvaOggetto(preclusioneRepository, Paths.get("data", "preclusioni.ser"));
     }
      
     public List<LocalDate> getPreclusioniPer(YearMonth mese) {
@@ -62,8 +59,7 @@ public class RegimeService {
         }
         ParametriSistema parametri = parametriSistemaRepository.load();
         parametri.setMaxPersonePerIscrizione(max);
-        parametriSistemaRepository.save(parametri);
-        FileRepositoryPersistence.salvaOggetto(parametriSistemaRepository, Paths.get("data", "parametri-sistema.ser"));
+        parametriSistemaRepository.save(parametri);;
     }
 
     public List<Volontario> getElencoVolontari() {

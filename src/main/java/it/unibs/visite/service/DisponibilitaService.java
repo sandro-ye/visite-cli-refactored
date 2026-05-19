@@ -2,10 +2,8 @@ package it.unibs.visite.service;
 
 import it.unibs.visite.core.DomainException;
 import it.unibs.visite.model.*;
-import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 
-import java.nio.file.Paths;
 import java.time.*;
 import java.util.List;
 
@@ -28,7 +26,6 @@ public class DisponibilitaService {
         }
         volontario.addDisponibilita(data);
         volontarioRepository.save(volontario);
-        salva();
     }
 
     public boolean verificaDisponibilita(String nickname, LocalDate data) {
@@ -55,7 +52,6 @@ public class DisponibilitaService {
         Volontario volontario = getVolontarioByNickname(nickname);
         volontario.removeDisponibilita(data);
         volontarioRepository.save(volontario);
-        salva();
     }
 
     public List<DisponibilitaVolontario> getDisponibilitaDi(String nickname, YearMonth mese) {
@@ -83,9 +79,5 @@ public class DisponibilitaService {
     private Volontario getVolontarioByNickname(String nickname) {
         return volontarioRepository.findByNickname(nickname)
                 .orElseThrow(() -> new DomainException("Volontario non esistente"));
-    }
-
-    private void salva() {
-        FileRepositoryPersistence.salvaOggetto(volontarioRepository, Paths.get("data", "volontari.ser"));
     }
 }

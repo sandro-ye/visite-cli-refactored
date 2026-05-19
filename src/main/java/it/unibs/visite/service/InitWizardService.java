@@ -17,12 +17,15 @@ public class InitWizardService{
     private final LuogoRepository luogoRepository;
     private final VolontarioRepository volontarioRepository;
     private final TipoVisitaRepository tipoVisitaRepository;
+    private final AuthService authService;
 
-    public InitWizardService(ParametriSistemaRepository parametriSistemaRepository, LuogoRepository luogoRepository, VolontarioRepository volontarioRepository, TipoVisitaRepository tipoVisitaRepository) {
+    public InitWizardService(ParametriSistemaRepository parametriSistemaRepository, LuogoRepository luogoRepository, 
+                VolontarioRepository volontarioRepository, TipoVisitaRepository tipoVisitaRepository, AuthService authService) {
         this.parametriSistemaRepository = parametriSistemaRepository;
         this.luogoRepository = luogoRepository;
         this.volontarioRepository = volontarioRepository;
         this.tipoVisitaRepository = tipoVisitaRepository;
+        this.authService = authService;
     }
 
     public boolean isInitialized() {
@@ -44,17 +47,12 @@ public class InitWizardService{
         p.markInitialized();
 
         parametriSistemaRepository.save(p);
-
-        FileRepositoryPersistence.salvaOggetto(parametriSistemaRepository, 
-                Paths.get("data", "parametri-sistema.ser"));
     }
 
     public void addLuogo(String nome, String descrizione) {
         Preconditions.notBlank(nome, "Nome luogo obbligatorio");
         Luogo l = new Luogo(nome, descrizione);
         luogoRepository.save(l);
-        FileRepositoryPersistence.salvaOggetto(luogoRepository, 
-                Paths.get("data", "luogo-repository.ser"));
     }
 
     public boolean hasLuoghi() {
@@ -76,8 +74,6 @@ public class InitWizardService{
             .orElseThrow(() -> new IllegalArgumentException("Luogo inesistente"));
         TipoVisita t = new TipoVisita(l.getId(), nomeTipoVisita, descrizione);
         tipoVisitaRepository.save(t);
-        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, 
-                Paths.get("data", "tipo-visita-repository.ser"));
     }
 
     public List<String> getAllLuoghiNames() {
@@ -108,9 +104,7 @@ public class InitWizardService{
         v.orElseGet(() -> {
             Volontario newVolontario = new Volontario(nickname);
             volontarioRepository.save(newVolontario);
-            FileRepositoryPersistence.salvaOggetto(volontarioRepository, 
-                Paths.get("data", "volontario-repository.ser"));
-            new AuthService().createVolunteer(nickname);
+            authService.createVolunteer(nickname);
             return newVolontario;
         });
         tipoVisitaRepository.save(t);

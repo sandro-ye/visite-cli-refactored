@@ -1,11 +1,9 @@
 package it.unibs.visite.service;
 
 import it.unibs.visite.repository.TipoVisitaRepository;
-import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.model.TipoVisita;
 import java.time.*;
 import java.util.*;
-import java.nio.file.Paths;
 
 public class TipoVisitaService {
     private final TipoVisitaRepository tipoVisitaRepository;
@@ -33,7 +31,6 @@ public class TipoVisitaService {
             tipoVisita.get().setNumeroMinimoPartecipanti(numeroMinimoPartecipanti);
             tipoVisita.get().setNumeroMassimoPartecipanti(numeroMassimoPartecipanti);
             tipoVisitaRepository.save(tipoVisita.get());
-            FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, Paths.get("data", "tipo_visita_repository.ser"));
         } else {
             throw new IllegalArgumentException("TipoVisita con titolo " + nomeTipoVisita + " non trovato");
         }
