@@ -1,5 +1,8 @@
 package it.unibs.visite.cli;
 
+import java.time.LocalDate;
+
+import it.unibs.visite.controller.VisitBatchController;
 import it.unibs.visite.security.AuthService;
 /*
     - modifica login con LoginCLI
@@ -17,14 +20,17 @@ import it.unibs.visite.security.AuthService;
 
 public class MainCLI {
     private final AuthService auth;
+    private final VisitBatchController visitBatchController;
     private final LoginCLI loginCLI;
     private final FruitoreCLI fruitoreCLI;  
     private final VolunteerCLI volunteerCLI;
     private final RegimeCLI regimeCLI;
     private final InitWizardCLI initWizardCLI;
 
-    public MainCLI(AuthService auth, LoginCLI loginCLI, FruitoreCLI fruitoreCLI, VolunteerCLI volunteerCLI, RegimeCLI regimeCLI, InitWizardCLI initWizardCLI) {
+    public MainCLI(AuthService auth, VisitBatchController visitBatchController, LoginCLI loginCLI, FruitoreCLI fruitoreCLI, VolunteerCLI volunteerCLI, 
+                RegimeCLI regimeCLI, InitWizardCLI initWizardCLI) {
         this.auth = auth;
+        this.visitBatchController = visitBatchController;
         this.loginCLI = loginCLI;
         this.fruitoreCLI = fruitoreCLI;
         this.volunteerCLI = volunteerCLI;
@@ -38,6 +44,7 @@ public class MainCLI {
         System.out.println("--------------------");
 
         String username = loginCLI.run();
+        visitBatchController.eseguiBatch(LocalDate.now());
 
         switch (auth.getUserRole(username)) {
             case "FRUITORE" -> {

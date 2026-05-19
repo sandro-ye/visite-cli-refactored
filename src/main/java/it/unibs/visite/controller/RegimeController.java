@@ -49,4 +49,8 @@ public class RegimeController {
     public List<Visita> getVisitePerStato(StatoVisita stato) {
         return regimeService.getVisitePerStato(stato);
     }
+
+    public boolean checkGiornoSedici() {
+        return regimeService.checkGiornoSedici();
+    }
 }

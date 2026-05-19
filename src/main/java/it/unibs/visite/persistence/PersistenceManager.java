@@ -3,7 +3,7 @@ package it.unibs.visite.persistence;
 import java.nio.file.*;
 import it.unibs.visite.repository.memory.*;
 
-public class PersistanceManager {
+public class PersistenceManager {
     private static final Path DATA_DIR = Paths.get("data");
     private static final Path VOLONTARI_PATH = DATA_DIR.resolve("volontari.ser");
     private static final Path VISITE_REPOSITORY_PATH = DATA_DIR.resolve("visite_repository.ser");
@@ -23,7 +23,7 @@ public class PersistanceManager {
     private final InMemoryPreclusioneRepository preclusioneRepository;
     private final InMemoryParametriSistemaRepository parametriSistemaRepository;
 
-    public PersistanceManager() {
+    public PersistenceManager() {
         creaCartellaData();
 
         this.volontarioRepository = FileRepositoryPersistence.caricaOggetto(VOLONTARI_PATH, InMemoryVolontarioRepository::new);

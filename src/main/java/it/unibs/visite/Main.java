@@ -1,63 +1,77 @@
 package it.unibs.visite;
 
-import it.unibs.visite.cli.InitWizardCLI;
-import it.unibs.visite.cli.MainCLI;
-import it.unibs.visite.cli.RegimeCLI;
-import it.unibs.visite.persistence.FilePersistence;
-import it.unibs.visite.security.AuthService;
-import it.unibs.visite.service.ConfigService;
-import it.unibs.visite.service.RegimeService;
-
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.Scanner;
+
+import it.unibs.visite.bootstrap.AuthBootstrap;
+import it.unibs.visite.cli.*;
+import it.unibs.visite.controller.*;
+import it.unibs.visite.service.*;
+import it.unibs.visite.repository.*;
+import it.unibs.visite.persistence.PersistenceManager;
+import it.unibs.visite.security.*;
+import it.unibs.visite.repository.CredentialsRepository;
+import it.unibs.visite.repository.file.FileCredentialsRepository;
+
 
 public class Main {
     public static void main(String[] args) {
-        /*
+
         Scanner in = new Scanner(System.in);
-        FilePersistence fp = new FilePersistence(Path.of(System.getProperty("user.home"), ".visite-cli"));
-        fp.ensureDirs();
-        ConfigService config = new ConfigService(fp);
-        AuthService auth = new AuthService(fp);
+        //persistencemanager
+        PersistenceManager persistenceManager = new PersistenceManager();
 
-        System.out.println("== Gestione Visite — CLI ==");
-        String username;
-        while (true) {
-            System.out.print("Username: "); username = in.nextLine();
-            System.out.print("Password: "); char[] pwd = in.nextLine().toCharArray();
-            if (auth.login(username, pwd)) break;
-            System.out.println("Credenziali non valide.");
-        }
+        //repositories
+        VisitaRepository visitaRepository = persistenceManager.getVisitaRepository();
+        VisitaRepository archivioVisiteRepository = persistenceManager.getArchivioVisiteRepository();
+        TipoVisitaRepository tipoVisitaRepository = persistenceManager.getTipoVisitaRepository();
+        LuogoRepository luogoRepository = persistenceManager.getLuogoRepository();
+        VolontarioRepository volontarioRepository = persistenceManager.getVolontarioRepository();
+        ParametriSistemaRepository parametriSistemaRepository = persistenceManager.getParametriSistemaRepository();
+        PreclusioneRepository preclusioneRepository = persistenceManager.getPreclusioneRepository();
+        FruitoreRepository fruitoreRepository = persistenceManager.getFruitoreRepository();
 
-        // Se primo accesso (admin/admin) forza cambio password
-        if (auth.mustChangePassword(username)) {
-            System.out.println("È necessario cambiare la password.");
-            while (true) {
-                System.out.print("Nuova password: "); char[] p1 = in.nextLine().toCharArray();
-                System.out.print("Ripeti password: "); char[] p2 = in.nextLine().toCharArray();
-                if (!java.util.Arrays.equals(p1, p2)) { System.out.println("Le password non coincidono."); continue; }
-                if (p1.length < 6) { System.out.println("Min 6 caratteri."); continue; }
-                auth.changePassword(username, p1);
-                System.out.println("Password aggiornata.");
-                break;
-            }
-        }
+        //credentials
+        Path credsPath = Paths.get("data", "credentials.ser");
+        CredentialsRepository credentialsRepository = new FileCredentialsRepository(credsPath);
+        CredentialsStore credentialsStore = AuthBootstrap.initialize(credentialsRepository);
+        AuthService authService = new AuthService(credentialsRepository, credentialsStore);
 
-        // Wizard inizializzazione una tantum
-        if (!config.isInitialized()) {
-            System.out.println("\nIl sistema non è ancora inizializzato.");
-            new InitWizardCLI(in, config).runWizard();
-        } else {
-            System.out.println("\nSistema già inizializzato.");
-            System.out.println("Ambito: " + config.getSnapshot().getParametri().getAmbitoTerritoriale() +
-                               " — Max per iscrizione: " + config.getSnapshot().getParametri().getMaxPersonePerIscrizione());
-            RegimeService regimeService = new RegimeService(config);
-            new RegimeCLI(in, regimeService).run();
-        }
+        //services
+        DisponibilitaService disponibilitaService = new DisponibilitaService(preclusioneRepository, volontarioRepository);
+        FruitoreService fruitoreService = new FruitoreService(parametriSistemaRepository, visitaRepository, tipoVisitaRepository, fruitoreRepository);
+        InitWizardService initWizardService = new InitWizardService(parametriSistemaRepository, luogoRepository, volontarioRepository, 
+                    tipoVisitaRepository, authService);
+        PlannerService plannerService = new PlannerService(parametriSistemaRepository, preclusioneRepository, volontarioRepository, 
+                    visitaRepository, tipoVisitaRepository, luogoRepository, disponibilitaService, authService);
+        RegimeService regimeService = new RegimeService(preclusioneRepository, visitaRepository, archivioVisiteRepository, parametriSistemaRepository, 
+                    volontarioRepository, luogoRepository, tipoVisitaRepository);
+        TipoVisitaService tipoVisitaService = new TipoVisitaService(tipoVisitaRepository);
+        VisitBatchService visitBatchService = new VisitBatchService(archivioVisiteRepository, visitaRepository);
 
-        System.out.println("\nBye.");
-        */
-       
-        new MainCLI().run();
+        //controllers
+        FruitoreController fruitoreController = new FruitoreController(fruitoreService);
+        GiornoSediciController giornoSediciController = new GiornoSediciController(plannerService);
+        InitWizardController initWizardController = new InitWizardController(initWizardService);
+        LoginController loginController = new LoginController(authService);
+        RegimeController regimeController = new RegimeController(regimeService);
+        TipoVisitaController tipoVisitaController = new TipoVisitaController(tipoVisitaService);
+        VisitBatchController visitBatchController = new VisitBatchController(visitBatchService);
+        VolunteerController volunteerController = new VolunteerController(disponibilitaService);
+
+        //cli
+        FruitoreCLI fruitoreCLI = new FruitoreCLI(in, fruitoreController);
+        TipoVisitaCLI tipoVisitaCLI = new TipoVisitaCLI(in, tipoVisitaController);
+        GiornoSediciCLI giornoSediciCLI = new GiornoSediciCLI(giornoSediciController, tipoVisitaCLI, in);
+        InitWizardCLI initWizardCLI = new InitWizardCLI(in, initWizardController, tipoVisitaCLI);
+        LoginCLI loginCLI = new LoginCLI(loginController, in);
+        RegimeCLI regimeCLI = new RegimeCLI(in, regimeController, giornoSediciCLI);
+        VolunteerCLI volunteerCLI = new VolunteerCLI(in, volunteerController);
+
+        //mainCLI
+        MainCLI mainCLI = new MainCLI(authService, visitBatchController, loginCLI, fruitoreCLI, volunteerCLI, regimeCLI, initWizardCLI);
+
+        //avvio applicazione 
+        mainCLI.run();
     }
 }

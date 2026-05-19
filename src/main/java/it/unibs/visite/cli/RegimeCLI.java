@@ -11,14 +11,19 @@ import it.unibs.visite.controller.RegimeController;
 
 public class RegimeCLI {
     private final RegimeController regimeController;
+    private final GiornoSediciCLI giornoSediciCLI;
     private final Scanner in;
 
-    public RegimeCLI(Scanner in, RegimeController regimeController) {
+    public RegimeCLI(Scanner in, RegimeController regimeController, GiornoSediciCLI giornoSediciCLI) {
         this.in = in;
         this.regimeController = regimeController;
+        this.giornoSediciCLI = giornoSediciCLI;
     }
 
     public void run() {
+        if (regimeController.checkGiornoSedici()) {
+            giornoSediciCLI.run();
+        }
         while (true) {
             System.out.println("\n=== MENU FUNZIONI A REGIME ===");
             System.out.println("1) Aggiungi preclusione per mese i+3");

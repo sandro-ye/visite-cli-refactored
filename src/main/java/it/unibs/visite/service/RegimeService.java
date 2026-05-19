@@ -106,6 +106,10 @@ public class RegimeService {
             .collect(Collectors.toList());
     }
 
+    public boolean checkGiornoSedici() {
+        return LocalDate.now().getDayOfMonth() == 16;
+    }
+
     /**
      * Aggiunge una preclusione per una data appartenente al mese target (YearMonth).
      * Controlla che:
