@@ -83,7 +83,7 @@ public class RegimeService {
     public List<TipoVisita> getTipiVisitaPerLuogo(String luogoId) {
         Optional<Luogo> l = luogoRepository.findLuogoById(luogoId);
         if (l.isPresent()) {
-            List<String> tipiIds = l.get().getTipiVisitaIds().stream().distinct().collect(Collectors.toList());
+            List<String> tipiIds = l.get().getTipiVisitaIds().stream().collect(Collectors.toList());
             List<TipoVisita> tipi = new ArrayList<>();
             for (String tid : tipiIds) {
                 Optional<TipoVisita> t = tipoVisitaRepository.findById(tid);

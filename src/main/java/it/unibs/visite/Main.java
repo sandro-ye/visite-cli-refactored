@@ -10,7 +10,6 @@ import it.unibs.visite.service.*;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.persistence.PersistenceManager;
 import it.unibs.visite.security.*;
-import it.unibs.visite.repository.CredentialsRepository;
 import it.unibs.visite.repository.file.FileCredentialsRepository;
 
 
@@ -72,6 +71,7 @@ public class Main {
         MainCLI mainCLI = new MainCLI(authService, visitBatchController, loginCLI, fruitoreCLI, volunteerCLI, regimeCLI, initWizardCLI);
 
         //avvio applicazione 
+        Runtime.getRuntime().addShutdownHook(new Thread(persistenceManager::saveAll));
         mainCLI.run();
     }
 }
