@@ -1,12 +1,10 @@
 package it.unibs.visite.service;
 
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.model.*;
-import it.unibs.visite.persistence.FileRepositoryPersistence;
 import it.unibs.visite.repository.*;
 import it.unibs.visite.security.AuthService;
 
@@ -100,18 +98,15 @@ public class InitWizardService{
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("TipoVisita inesistente"));
         Optional<Volontario> v = volontarioRepository.findByNickname(nickname);
-        v.ifPresent(volontario -> t.addVolontario(volontario.getNickname()));
-        v.orElseGet(() -> {
+        if(v.isPresent()) {
+            t.addVolontario(nickname);
+        } else {
             Volontario newVolontario = new Volontario(nickname);
             volontarioRepository.save(newVolontario);
             authService.createVolunteer(nickname);
-            return newVolontario;
-        });
+            t.addVolontario(nickname);
+        }
         tipoVisitaRepository.save(t);
-        FileRepositoryPersistence.salvaOggetto(tipoVisitaRepository, 
-                Paths.get("data", "tipo-visita-repository.ser"));
-        FileRepositoryPersistence.salvaOggetto(volontarioRepository, 
-                Paths.get("data", "volontario-repository.ser"));
     }
 
     public void validateInvariants() {
