@@ -71,7 +71,7 @@ public class Main {
         MainCLI mainCLI = new MainCLI(authService, visitBatchController, loginCLI, fruitoreCLI, volunteerCLI, regimeCLI, initWizardCLI);
 
         //avvio applicazione 
-        Runtime.getRuntime().addShutdownHook(new Thread(persistenceManager::saveAll));
         mainCLI.run();
+        Runtime.getRuntime().addShutdownHook(new Thread(persistenceManager::saveAll));
     }
 }
