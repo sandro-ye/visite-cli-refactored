@@ -50,7 +50,7 @@ public class MainCLI {
             case "FRUITORE" -> {
                 fruitoreCLI.run(username);
             }
-            case "VOLONTARIO" -> {
+            case "VOLUNTEER" -> {
                 volunteerCLI.run(username);
             }
             case "ADMIN" -> {

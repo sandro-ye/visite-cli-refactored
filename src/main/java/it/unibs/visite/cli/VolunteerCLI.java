@@ -17,17 +17,8 @@ public final class VolunteerCLI {
     }
 
     public void run(String nickname) {
-        System.out.println("=== Area VOLONTARIO ===");
-        try {
-            mainMenu(nickname);
-        } finally {
-            System.out.println("Logout eseguito.\n");
-        }
-    }
-
-    private void mainMenu(String nickname) {
         while (true) {
-            System.out.printf("\n--- Menu Volontario %s ---\n", nickname);
+            System.out.println("=== Area VOLONTARIO ===");
             System.out.println("1) I miei tipi di visita");
             System.out.println("2) Inserisci disponibilità per il mese entrante");
             System.out.println("3) Visualizza / revoca disponibilità (mese entrante)");

@@ -37,14 +37,31 @@ public class TipoVisitaService {
     }
 
     private Set<DayOfWeek> parseGiorniSettimana(String input) {
-        Set<DayOfWeek> giorniSettimana = new HashSet<>();
-        String[] giorni = input.split(",");
-        for (String giorno : giorni) {
-            try {
-                giorniSettimana.add(DayOfWeek.valueOf(giorno.trim().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Giorno della settimana non valido: " + giorno);
+        Set<DayOfWeek> giorniSettimana = EnumSet.noneOf(DayOfWeek.class);
+
+        // Mappa ITA → ENGLISH per compatibilità con DayOfWeek
+        Map<String, DayOfWeek> traduzione = Map.ofEntries(
+            Map.entry("LUNEDI", DayOfWeek.MONDAY),
+            Map.entry("MARTEDI", DayOfWeek.TUESDAY),
+            Map.entry("MERCOLEDI", DayOfWeek.WEDNESDAY),
+            Map.entry("GIOVEDI", DayOfWeek.THURSDAY),
+            Map.entry("VENERDI", DayOfWeek.FRIDAY),
+            Map.entry("SABATO", DayOfWeek.SATURDAY),
+            Map.entry("DOMENICA", DayOfWeek.SUNDAY)
+        );
+
+        if(!input.isEmpty()) {
+            String[] giorni = input.split(",");
+            for (String giorno : giorni) {
+                try {
+                    DayOfWeek day = traduzione.get(giorno);
+                    giorniSettimana.add(day);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Giorno della settimana non valido: " + giorno);
+                }
             }
+        } else {
+
         }
         return giorniSettimana;
     }

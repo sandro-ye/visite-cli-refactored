@@ -64,13 +64,12 @@ public class LoginCLI {
         System.out.println("1) Registrati");
         System.out.println("2) Accedi");
         System.out.println("0) Esci");
-        System.out.print("> ");
     }
 
     private void changePassword(String username) {
         System.out.println("Devi cambiare la password al primo accesso.");
-        String pass1 = leggiStringa("Vecchia password: ");
-        String pass2 = leggiStringa("Nuova password: ");
+        String pass1 = leggiStringa("Inserisci nuova password: ");
+        String pass2 = leggiStringa("Ripeti nuova password: ");
         loginController.passwordChange(username, pass1.toCharArray(), pass2.toCharArray());
         System.out.println("Password cambiata con successo. Effettua il login.");
     }
