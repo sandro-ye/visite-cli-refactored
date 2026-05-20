@@ -1,20 +1,7 @@
 package it.unibs.visite.seed;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-
-import it.unibs.visite.model.*;
-import it.unibs.visite.persistence.FilePersistence;
-import it.unibs.visite.security.AuthService;
-import it.unibs.visite.service.ConfigService;
-
 public class SeedDemo {
+    /*
     private static final char[] password = "password".toCharArray();
 
     public static void main(String[] args) {
@@ -122,4 +109,5 @@ public class SeedDemo {
         System.out.println("Seed dati demo completato con successo!");
         System.out.println("Cartella dati: " + baseDir.toAbsolutePath());
     }
+        */
 }
