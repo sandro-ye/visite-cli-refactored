@@ -108,7 +108,8 @@ public class RegimeCLI {
     }
 
     private void cmdTipiPerLuogo() {
-        System.out.print("Inserisci id luogo: ");
+        cmdElencoLuoghi();
+        System.out.print("Inserisci nome luogo: ");
         String id = in.nextLine().trim();
         List<TipoVisita> tipi = regimeController.tipiPerLuogo(id);
         if (tipi.isEmpty()) System.out.println("Nessun tipo trovato per questo luogo.");

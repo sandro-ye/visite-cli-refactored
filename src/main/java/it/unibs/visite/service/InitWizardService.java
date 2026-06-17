@@ -71,7 +71,9 @@ public class InitWizardService{
         Luogo l = luogoRepository.findByNome(nomeLuogo)
             .orElseThrow(() -> new IllegalArgumentException("Luogo inesistente"));
         TipoVisita t = new TipoVisita(l.getId(), nomeTipoVisita, descrizione);
+        l.addTipoVisita(t);
         tipoVisitaRepository.save(t);
+        luogoRepository.save(l);
     }
 
     public List<String> getAllLuoghiNames() {
@@ -100,8 +102,11 @@ public class InitWizardService{
         Optional<Volontario> v = volontarioRepository.findByNickname(nickname);
         if(v.isPresent()) {
             t.addVolontario(nickname);
+            v.get().addTipoVisitaCompetenza(t);
+            volontarioRepository.save(v.get());
         } else {
             Volontario newVolontario = new Volontario(nickname);
+            newVolontario.addTipoVisitaCompetenza(t);
             volontarioRepository.save(newVolontario);
             authService.createVolunteer(nickname);
             t.addVolontario(nickname);

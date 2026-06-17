@@ -77,4 +77,16 @@ public class GiornoSediciController {
     public void associaVolontarioATipoVisita(String nickname, String titolo) {
         plannerService.associaVolontarioATipoVisita(nickname, titolo);
     }
+
+    public boolean isPianoProdotto() {
+        return plannerService.isPianoProdotto();
+    }
+
+    public void cominciaProduzionePiano() {
+        plannerService.cominciaProduzionePiano();
+    }
+
+    public void terminaProduzionePiano() {
+        plannerService.terminaProduzionePiano();
+    }
 }

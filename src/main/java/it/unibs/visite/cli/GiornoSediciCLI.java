@@ -29,23 +29,30 @@ public class GiornoSediciCLI {
 
     public void run() {
         System.out.println("\n=== MENU OPERAZIONI GIORNO 16 ===");
-        produciPianoVisite();
-        gestioneAggiunteRimozioni(); //aggiunta/rimozione volontari, luoghi, tipi visita, preclusioni
-        riapriRaccoltaDisponibilita();
+        if(controller.isPianoProdotto()) {
+            produciPianoVisite();
+            gestioneAggiunteRimozioni(); //aggiunta/rimozione volontari, luoghi, tipi visita, preclusioni
+            riapriRaccoltaDisponibilita();
+        }
         System.out.println("\nTutte le operazioni del giorno 16 sono state completate.");
     }
 
     private void produciPianoVisite() {
+        controller.cominciaProduzionePiano();
         YearMonth target = YearMonth.now().plusMonths(1);
         System.out.println("Produzione piano visite per il mese i+1: " + target);
 
         for(LocalDate data : controller.giorniNonPreclusiIn(target)) {
             System.out.println("Data: " + data);
             for(TipoVisita tipo : controller.visiteProgrammabiliPerData().getOrDefault(data, List.of())) {
-                System.out.println("  Tipo visita: " + tipo.getTitolo());
+                System.out.println("Tipo visita: " + tipo.getTitolo());
                 List<String> volontari = controller.volontariDisponibiliInDataPerTipo(data, tipo).stream()
                     .map(v -> v.getNickname())
                     .toList();
+                if(volontari.isEmpty()) {
+                    System.out.println("Nessun volontario disponibile per la data: " + data);
+                    continue;
+                }
                 System.out.println("Scegli il volontario (nickname) da assegnare alla visite (invio per saltare): ");
                 for (int i = 0; i < volontari.size(); i++) {
                     System.out.println((i + 1) + ") " + volontari.get(i));
@@ -62,6 +69,7 @@ public class GiornoSediciCLI {
         }
 
         System.out.println("Piano visite per " + target + " prodotto con successo.");
+        controller.terminaProduzionePiano();
     }
 
     private void gestioneAggiunteRimozioni() {
@@ -229,7 +237,7 @@ public class GiornoSediciCLI {
 
     private void riapriRaccoltaDisponibilita() {
         System.out.println("Riapertura della raccolta delle disponibilità per " + LocalDate.now().getMonth().plus(2) + "...");
-        controller.riapriRaccoltaDisponibilita();
+        //controller.riapriRaccoltaDisponibilita();
         System.out.println("Raccolta disponibilità per " + LocalDate.now().getMonth().plus(2) + " riaperta con successo.");
     }
 

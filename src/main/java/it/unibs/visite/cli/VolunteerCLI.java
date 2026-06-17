@@ -18,7 +18,7 @@ public final class VolunteerCLI {
 
     public void run(String nickname) {
         while (true) {
-            System.out.println("=== Area VOLONTARIO ===");
+            System.out.println("\n=== Area VOLONTARIO ===");
             System.out.println("1) I miei tipi di visita");
             System.out.println("2) Inserisci disponibilità per il mese entrante");
             System.out.println("3) Visualizza / revoca disponibilità (mese entrante)");
@@ -42,13 +42,14 @@ public final class VolunteerCLI {
             return;
         }
         for (TipoVisita t : tipi) {
-            System.out.printf(" - %f | %f", t.getTitolo(),  t.getDescrizione());
+            System.out.println("Titolo tipo visita | Descrizione ");
+            System.out.printf(" - %s | %s \n", t.getTitolo(),  t.getDescrizione());
         }
     }
 
     private void inserisciDisponibilita(String nickname) {
         YearMonth ym = controller.meseSuccessivo();
-        System.out.println("Inserisci date disponibili nel mese entrante: " + ym);
+        System.out.println("\nInserisci date disponibili nel mese entrante: " + ym);
         while(in.hasNextLine()) { 
             System.out.println("Formato: YYYY-MM-DD (vuoto per terminare)");
             System.out.print("> ");

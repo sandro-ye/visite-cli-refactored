@@ -17,7 +17,7 @@ public class LoginCLI {
     public String run() {
         System.out.println("=== ACCESSO VISITE GUIDATE ===");
         stampaMenu();
-        int choice = leggiIntero(">");
+        int choice = leggiIntero("> ");
 
         String verifiedUsername = null;
 
@@ -75,7 +75,7 @@ public class LoginCLI {
     }
 
     private int leggiIntero(String msg) {
-        System.out.println(msg);
+        System.out.print(msg);
         while(!in.hasNextInt()) {
             in.nextLine();
             System.out.println("Input non valido. Riprova.");

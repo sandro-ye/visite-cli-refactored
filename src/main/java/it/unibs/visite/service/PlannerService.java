@@ -215,6 +215,18 @@ public class PlannerService {
     public void riapriRaccoltaDisponibilita() {
         parametriSistemaRepository.load().setAppPhase(AppPhase.RACCOLTA_DISPONIBILITA);
     }
+
+    public boolean isPianoProdotto() {
+        return parametriSistemaRepository.load().getAppPhase().equals(AppPhase.RACCOLTA_SUCCESSIVA);
+    }
+
+    public void cominciaProduzionePiano() {
+        parametriSistemaRepository.load().setAppPhase(AppPhase.GENERAZIONE_PIANO);
+    }
+
+    public void terminaProduzionePiano() {
+        parametriSistemaRepository.load().setAppPhase(AppPhase.RACCOLTA_SUCCESSIVA);
+    }
 }
 
     /*

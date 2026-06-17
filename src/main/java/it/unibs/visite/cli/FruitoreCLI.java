@@ -29,8 +29,7 @@ public class FruitoreCLI {
             System.out.println("3) Le mie iscrizioni");
             System.out.println("4) Disdici una iscrizione");
             System.out.println("0) Logout");
-            System.out.print("> ");
-            String choice = in.nextLine().trim();
+            String choice = leggiStringa("> ");
 
             switch (choice) {
                 case "1" -> mostraDisponibili();
@@ -48,7 +47,7 @@ public class FruitoreCLI {
     
     private void mostraDisponibili() {
         List<Visita> proposte = controller.visualizzaVisiteDisponibili();
-        System.out.println("-- visite disponibili --");
+        System.out.println("\n-- Visite Disponibili --");
         stampaElencoVisite(proposte);
     }
 
@@ -79,16 +78,17 @@ public class FruitoreCLI {
 
     private void iscriviti(String username) {
         mostraDisponibili();
-        System.out.print("\nInserisci l'id della visita a cui iscriversi: ");
-        String idVisita = in.nextLine().trim();
-        System.out.printf("Inserisci il numero di persone da iscrivere (max: %d): ", 
-                controller.getMaxPersonePerIscrizione());
-        int numeroPersone = Integer.parseInt(in.nextLine().trim());
-        controller.iscriviAVisita(username, idVisita, numeroPersone);
+        String idVisita = leggiStringa("\nInserisci l'id della visita a cui iscriversi (invio per uscire): ");
+        if(idVisita.isEmpty())  return;
+        else {
+            int numMax = controller.getMaxPersonePerIscrizione();
+            int numeroPersone = leggiIntero("Inserisci il numero di persone da iscrivere (max: " + numMax + "): ");
+            controller.iscriviAVisita(username, idVisita, numeroPersone);
+        }
     }
 
     private void mieIscrizioni(String username) {  
-        System.out.println("-- le mie iscrizioni --");
+        System.out.println("\n-- Le Mie Iscrizioni --");
         List<Iscrizione> mie = controller.getIscrizioniDi(username);
         stampaElencoIscrizioni(username, mie);
     }
@@ -117,10 +117,26 @@ public class FruitoreCLI {
 
     private void disdici(String username) {
         mieIscrizioni(username);
-        System.out.println("-- disdetta iscrizione --");
-        System.out.print("Inserisci il codice prenotazione: ");
-        String codice = in.nextLine().trim();
-        controller.disdiciIscrizione(username, codice);
+        System.out.println("\n-- Disdetta Iscrizione --");
+        String codice = leggiStringa("Inserisci il codice prenotazione (vuoto per terminare): ");
+        if(codice.isEmpty()) return;
+        else controller.disdiciIscrizione(username, codice);
+    }
+    
+    private String leggiStringa(String msg) {
+        System.out.print(msg);
+        return in.nextLine().trim();
+    }
+
+    private int leggiIntero(String msg) {
+        while (true) {
+            System.out.print(msg);
+            try {
+                return Integer.parseInt(in.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Inserisci un numero intero valido.");
+            }
+        }
     }
 
 

@@ -1,6 +1,6 @@
 package it.unibs.visite.service;
 
-import it.unibs.visite.core.DomainException;
+import it.unibs.visite.core.Preconditions;
 import it.unibs.visite.model.*;
 import it.unibs.visite.repository.*;
 
@@ -29,21 +29,21 @@ public class RegimeService {
         this.tipoVisitaRepository = tipoVisitaRepository;
     }
     
-    public void aggiungiPreclusione(LocalDate data) {
-        if(YearMonth.from(data).isBefore(YearMonth.now().plusMonths(3))) {
-            throw new IllegalArgumentException("Impossiibile aggiungere preclusione");
-        }
-
+    public void aggiungiPreclusione(LocalDate dataDaEscludere) {
         YearMonth now = YearMonth.from(LocalDate.now());
+        YearMonth targetMonth = now.plusMonths(3);
+        
+        Preconditions.check(YearMonth.from(dataDaEscludere).equals(targetMonth), "data deve appartenere al mese target");
+
         LocalDate windowStart = LocalDate.of(now.getYear(), now.getMonth(), 16);
         LocalDate windowEnd = LocalDate.of(now.plusMonths(1).getYear(),
             now.plusMonths(1).getMonth(),
             15);
-        if(data.isBefore(windowStart) || data.isAfter(windowEnd)) {
-            throw new DomainException("Data fuori dalla finestra temporale consentita: dal " + windowStart + " al " + windowEnd);
-        }
+
+        Preconditions.check(!LocalDate.now().isBefore(windowStart) && !LocalDate.now().isAfter(windowEnd), 
+            "fuori dalla finestra temporale consentita: dal " + windowStart + " al " + windowEnd);
         
-        preclusioneRepository.add(data);
+        preclusioneRepository.add(dataDaEscludere);
     }
      
     public List<LocalDate> getPreclusioniPer(YearMonth mese) {
@@ -80,8 +80,8 @@ public class RegimeService {
             .collect(Collectors.toList());
     }
 
-    public List<TipoVisita> getTipiVisitaPerLuogo(String luogoId) {
-        Optional<Luogo> l = luogoRepository.findLuogoById(luogoId);
+    public List<TipoVisita> getTipiVisitaPerLuogo(String nomeLuogo) {
+        Optional<Luogo> l = luogoRepository.findByNome(nomeLuogo);
         if (l.isPresent()) {
             List<String> tipiIds = l.get().getTipiVisitaIds().stream().collect(Collectors.toList());
             List<TipoVisita> tipi = new ArrayList<>();
@@ -89,6 +89,7 @@ public class RegimeService {
                 Optional<TipoVisita> t = tipoVisitaRepository.findById(tid);
                 t.ifPresent(tipi::add);
             }
+            return tipi;
         }
         return List.of();
     }
@@ -107,7 +108,10 @@ public class RegimeService {
     }
 
     public boolean checkGiornoSedici() {
-        return LocalDate.now().getDayOfMonth() == 16;
+        if(LocalDate.now().isAfter(LocalDate.now().withDayOfMonth(16))) {
+            parametriSistemaRepository.load().setAppPhase(AppPhase.RACCOLTA_DISPONIBILITA);
+            return false;
+        } else return LocalDate.now().getDayOfMonth() == 16 && parametriSistemaRepository.load().getAppPhase().equals(AppPhase.RACCOLTA_DISPONIBILITA);
     }
 
     /**

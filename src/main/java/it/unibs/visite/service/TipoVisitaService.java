@@ -54,7 +54,7 @@ public class TipoVisitaService {
             String[] giorni = input.split(",");
             for (String giorno : giorni) {
                 try {
-                    DayOfWeek day = traduzione.get(giorno);
+                    DayOfWeek day = traduzione.get(giorno.toUpperCase());
                     giorniSettimana.add(day);
                 } catch (IllegalArgumentException e) {
                     throw new IllegalArgumentException("Giorno della settimana non valido: " + giorno);

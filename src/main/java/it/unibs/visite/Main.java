@@ -52,7 +52,7 @@ public class Main {
         FruitoreController fruitoreController = new FruitoreController(fruitoreService);
         GiornoSediciController giornoSediciController = new GiornoSediciController(plannerService);
         InitWizardController initWizardController = new InitWizardController(initWizardService);
-        LoginController loginController = new LoginController(authService);
+        LoginController loginController = new LoginController(authService, fruitoreService);
         RegimeController regimeController = new RegimeController(regimeService);
         TipoVisitaController tipoVisitaController = new TipoVisitaController(tipoVisitaService);
         VisitBatchController visitBatchController = new VisitBatchController(visitBatchService);
